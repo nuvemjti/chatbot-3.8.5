@@ -85,7 +85,7 @@ const ConfirmationModal = ({
     >
       <DialogTitle id="confirm-dialog">{title}</DialogTitle>
       <DialogContent dividers>
-	  <Typography>{children}</Typography>
+        <Typography>{children}</Typography>
         {isCellPhone && (
           <Grid style={{ width: 300, marginTop: 10 }} container>
             <Grid xs={12} item>
@@ -156,7 +156,6 @@ const ConfirmationModal = ({
             </Grid>
           </Grid>
         )}
-  
       </DialogContent>
       <DialogActions>
         <Button
@@ -169,7 +168,9 @@ const ConfirmationModal = ({
         <Button
           variant="contained"
           onClick={() => {
-            onSave(selectedWhatsapp);
+            if (isCellPhone) {
+              onSave(selectedWhatsapp);
+            }
             onClose(false);
             onConfirm();
           }}
