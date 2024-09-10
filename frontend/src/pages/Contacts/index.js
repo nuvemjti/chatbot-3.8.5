@@ -314,11 +314,11 @@ const Contacts = () => {
     }
 
 
-    const handleimportContact = async (whatsappId) => {
+    const handleimportContact = async () => {
         setImportContactModalOpen(false)
-        console.log("handleimportContact")
+
         try {
-            await api.post("/contacts/import", { whatsappId: 3 });
+            await api.post("/contacts/import", { whatsappId: importWhatsappId });
             history.go(0);
             setImportContactModalOpen(false);
         } catch (err) {
