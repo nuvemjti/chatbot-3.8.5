@@ -133,6 +133,7 @@ const Contacts = () => {
     const [importContactModalOpen, setImportContactModalOpen] = useState(false);
     const [deletingContact, setDeletingContact] = useState(null);
     const [ImportContacts, setImportContacts] = useState(null);
+    
     const [blockingContact, setBlockingContact] = useState(null);
     const [unBlockingContact, setUnBlockingContact] = useState(null);
     const [confirmOpen, setConfirmOpen] = useState(false);
@@ -144,6 +145,8 @@ const Contacts = () => {
     const fileUploadRef = useRef(null);
     const [selectedTags, setSelectedTags] = useState([]);
     const { setCurrentTicket } = useContext(TicketsContext);
+
+    const [importWhatsappId, setImportWhatsappId] = useState()
 
 
     const { getAll: getAllSettings } = useCompanySettings();
@@ -306,18 +309,26 @@ const Contacts = () => {
         setUnBlockingContact(null);
     };
 
-    const handleimportContact = async () => {
+    const onSave = (whatsappId) => {
+        setImportWhatsappId(whatsappId)
+    }
+
+
+    const handleimportContact = async (whatsappId) => {
+        setImportContactModalOpen(false)
+        console.log("handleimportContact")
         try {
-            await api.post("/contacts/import");
+            await api.post("/contacts/import", { whatsappId: 3 });
             history.go(0);
-            setImportContacts(false);
+            setImportContactModalOpen(false);
         } catch (err) {
             toastError(err);
-            setImportContacts(false);
+            setImportContactModalOpen(false);
         }
     };
 
     const handleimportChats = async () => {
+        console.log("handleimportChats")
         try {
             await api.post("/contacts/import/chats");
             history.go(0);
@@ -374,6 +385,11 @@ const Contacts = () => {
                 aria-labelledby="form-dialog-title"
                 contactId={selectedContactId}
             ></ContactModal>
+            {/* <ContactImportModal 
+                open={ImportContacts}
+                onClose={setConfirmOpen}
+                onSave={handleimportContact}
+            /> */}
             <ConfirmationModal
                 title={
                     deletingContact
@@ -388,6 +404,8 @@ const Contacts = () => {
                                     ? `${i18n.t("contacts.confirmationModal.importTitlte")}`
                                     : `${i18n.t("contactListItems.confirmationModal.importTitlte")}`
                 }
+                onSave={onSave}
+                isCellPhone={ImportContacts}
                 open={confirmOpen}
                 onClose={setConfirmOpen}
                 onConfirm={(e) =>
@@ -412,7 +430,7 @@ const Contacts = () => {
                             : unBlockingContact
                                 ? `${i18n.t("contacts.confirmationModal.unblockContact")}`
                                 : ImportContacts
-                                    ? `${i18n.t("contacts.confirmationModal.importMessage")}`
+                                    ? `Escolha de qual conexão deseja importar`
                                     : `${i18n.t(
                                         "contactListItems.confirmationModal.importMessage"
                                     )}`}
