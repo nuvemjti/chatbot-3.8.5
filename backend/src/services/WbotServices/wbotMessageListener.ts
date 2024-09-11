@@ -1197,7 +1197,7 @@ const verifyQueue = async (
 
       console.log("log... 1206")
 
-      await handleMessageIntegration(msg, wbot, companyId, integrations, ticket)
+      await handleMessageIntegration(msg, wbot, companyId, integrations, ticket, null,null, null, null)
 
       if (msg.key.fromMe) {
         console.log("log... 1211")
@@ -2625,6 +2625,10 @@ export const handleMessageIntegration = async (
   companyId: number,
   queueIntegration: QueueIntegrations,
   ticket: Ticket,
+  isMenu: boolean,
+  whatsapp: Whatsapp,
+  contact: Contact,
+  isFirstMsg: Ticket
 ): Promise<void> => {
   const msgType = getTypeMessage(msg);
 
@@ -2690,6 +2694,26 @@ export const handleMessageIntegration = async (
   } else if (queueIntegration.type === "typebot") {
     // await typebots(ticket, msg, wbot, queueIntegration);
     await typebotListener({ ticket, msg, wbot, typebot: queueIntegration });
+
+  }else if (queueIntegration.type === "flowbuilder"){
+
+    if (      
+      !isMenu &&
+      (!ticket.dataWebhook || ticket.dataWebhook["status"] === "stopped")
+    ) {
+      const integrations = await ShowQueueIntegrationService(whatsapp.integrationId, companyId);
+
+      console.log("flowbuilder")
+      if (integrations.type === "flowbuilder") {
+        await flowbuilderIntegration(msg, wbot, companyId, integrations, ticket, contact, isFirstMsg)
+      }
+
+    }else if(
+      !isNaN(parseInt(ticket.lastMessage)) &&
+      (ticket.status !== "open" && ticket.status !== "closed")
+    ){
+      await flowBuilderQueue(ticket, msg, wbot, whatsapp, companyId, contact, isFirstMsg)
+    }
 
   }
 }
@@ -3187,44 +3211,6 @@ const handleMessage = async (
       isMenu = flow.flow["nodes"].find((node: any) => node.id === ticket.lastFlowId)?.type === "menu";
     }
 
-
-  
-    if (
-      !ticket.fromMe &&
-      isMenu &&
-      (ticket.status !== "open" && ticket.status !== "closed") &&
-      !isNaN(parseInt(ticket.lastMessage))
-    ) {
-
-      await flowBuilderQueue(ticket, msg, wbot, whatsapp, companyId, contact, isFirstMsg)
-    }
-
-
-
-    //flowbuilder na conexao
-    if (
-      !ticket.imported &&
-      !msg.key.fromMe &&
-      !ticket.isGroup &&
-      !ticket.queue &&
-      !ticket.user &&
-      !isMenu &&
-      (!ticket.dataWebhook || ticket.dataWebhook["status"] === "stopped") &&
-      // ticket.isBot &&
-      !isNil(whatsapp.integrationId) &&
-      !ticket.useIntegration
-    ) {
-      const integrations = await ShowQueueIntegrationService(whatsapp.integrationId, companyId);
-
-      console.log("flowbuilder")
-      if (integrations.type === "flowbuilder") {
-        await flowbuilderIntegration(msg, wbot, companyId, integrations, ticket, contact, isFirstMsg)
-      }
-
-    }
-  
-
-
     //integraçao na conexao
     if (
       !ticket.imported &&
@@ -3236,10 +3222,10 @@ const handleMessage = async (
       !isNil(whatsapp.integrationId) &&
       !ticket.useIntegration
     ) {
-
+      console.log("3245")
       const integrations = await ShowQueueIntegrationService(whatsapp.integrationId, companyId);
 
-      await handleMessageIntegration(msg, wbot, companyId, integrations, ticket)
+      await handleMessageIntegration(msg, wbot, companyId, integrations, ticket, isMenu, whatsapp, contact, isFirstMsg)
 
 
       return
@@ -3255,7 +3241,8 @@ const handleMessage = async (
     ) {
       const integrations = await ShowQueueIntegrationService(ticket.integrationId, companyId);
 
-      await handleMessageIntegration(msg, wbot, companyId, integrations, ticket)
+      console.log("3264")
+      await handleMessageIntegration(msg, wbot, companyId, integrations, ticket, null, null, null, null)
 
       if (msg.key.fromMe) {
         await ticket.update({
