@@ -3211,6 +3211,18 @@ const handleMessage = async (
       isMenu = flow.flow["nodes"].find((node: any) => node.id === ticket.lastFlowId)?.type === "menu";
     }
 
+       //openai na conexao
+       if (
+        !ticket.queue &&
+        !isGroup &&
+        !msg.key.fromMe &&
+        !ticket.userId &&
+        !isNil(whatsapp.promptId)
+      ) {
+        await handleOpenAi(msg, wbot, ticket, contact, mediaSent, ticketTraking);
+      }
+
+
     //integraçao na conexao
     if (
       !ticket.imported &&
