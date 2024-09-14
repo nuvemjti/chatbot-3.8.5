@@ -255,6 +255,8 @@ export const ActionsWebhookService = async (
       }
 
       if (nodeSelected.type === "ticket") {
+
+        console.log("|================ TICKET ==================|")
         const queueId = nodeSelected.data?.data?.id || nodeSelected.data?.id
         const queue = await ShowQueueService(queueId, companyId)
 
@@ -301,26 +303,50 @@ export const ActionsWebhookService = async (
           }
         })
 
-        const { queues, greetingMessage, maxUseBotQueues, timeUseBotQueues } = await ShowWhatsAppService(whatsappId, companyId);
 
-        if (greetingMessage.length > 1) {
-          const body = formatBody(`${greetingMessage}`, ticket);
+        const enableQueuePosition = settings.sendQueuePosition === "enabled";
+
+
+        if(enableQueuePosition){
+
+          const count = await Ticket.findAndCountAll({
+            where: {
+              userId: null,
+              status: "pending",
+              companyId,
+              queueId: queue.id,
+              whatsappId: whatsapp.id,
+              isGroup: false
+            }
+          });
+  
+          // Lógica para enviar posição da fila de atendimento
+          const qtd = count.count === 0 ? 1 : count.count
+
+          const msgFila = `${settings.sendQueuePositionMessage} *${qtd}*`;
+
 
           const ticketDetails = await ShowTicketService(ticket.id, companyId);
 
-          await ticketDetails.update({
-            lastMessage: formatBody(queue.greetingMessage, ticket.contact)
-          });
+          const bodyFila = formatBody(`${msgFila}`, ticket.contact);
+
+          await delay(3000);
+          await typeSimulation(ticket, 'composing')
 
           await SendWhatsAppMessage({
-            body,
+            body: bodyFila,
             ticket: ticketDetails,
             quotedMsg: null
           });
 
           SetTicketMessagesAsRead(ticketDetails);
-        }
 
+          await ticketDetails.update({
+            lastMessage: bodyFila
+          });
+
+        }
+        
 
       }
 
