@@ -3,8 +3,9 @@ import React, {
   useEffect,
   useReducer,
   useContext,
-  useCallback
+  useCallback,
 } from "react";
+import { SiOpenai } from "react-icons/si";
 
 import { toast } from "react-toastify";
 import { useHistory } from "react-router-dom";
@@ -26,7 +27,7 @@ import {
   SpeedDialAction,
   SpeedDialIcon,
   Stack,
-  Typography
+  Typography,
 } from "@mui/material";
 import { useParams } from "react-router-dom/cjs/react-router-dom.min";
 import { CircularProgress } from "@material-ui/core";
@@ -42,7 +43,7 @@ import ReactFlow, {
   useEdgesState,
   addEdge,
   onElementsRemove,
-  useReactFlow
+  useReactFlow,
 } from "react-flow-renderer";
 import FlowBuilderAddTextModal from "../../components/FlowBuilderAddTextModal";
 import FlowBuilderIntervalModal from "../../components/FlowBuilderIntervalModal";
@@ -65,7 +66,7 @@ import {
   Message,
   MicNone,
   RocketLaunch,
-  Videocam
+  Videocam,
 } from "@mui/icons-material";
 import RemoveEdge from "./nodes/removeEdge";
 import FlowBuilderAddImgModal from "../../components/FlowBuilderAddImgModal";
@@ -80,19 +81,21 @@ import singleBlockNode from "./nodes/singleBlockNode";
 import { colorPrimary } from "../../styles/styles";
 import ticketNode from "./nodes/ticketNode";
 import { ConfirmationNumber } from "@material-ui/icons";
+import typebotNode from "./nodes/typebotNode";
+import FlowBuilderTypebotModal from "../../components/FlowBuilderAddTypebotModal";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   mainPaper: {
     flex: 1,
     padding: theme.spacing(1),
     position: "relative",
     backgroundColor: "#F8F9FA",
     overflowY: "scroll",
-    ...theme.scrollbarStyles
+    ...theme.scrollbarStyles,
   },
   speeddial: {
-    backgroundColor: "red"
-  }
+    backgroundColor: "red",
+  },
 }));
 
 function geraStringAleatoria(tamanho) {
@@ -118,11 +121,12 @@ const nodeTypes = {
   randomizer: randomizerNode,
   video: videoNode,
   singleBlock: singleBlockNode,
-  ticket: ticketNode
+  ticket: ticketNode,
+  typebot: typebotNode,
 };
 
 const edgeTypes = {
-  buttonedge: RemoveEdge
+  buttonedge: RemoveEdge,
 };
 
 const initialNodes = [
@@ -130,8 +134,8 @@ const initialNodes = [
     id: "1",
     position: { x: 250, y: 100 },
     data: { label: "Inicio do fluxo" },
-    type: "start"
-  }
+    type: "start",
+  },
 ];
 
 const initialEdges = [];
@@ -158,7 +162,8 @@ export const FlowBuilderConfig = () => {
   const [modalAddRandomizer, setModalAddRandomizer] = useState(null);
   const [modalAddVideo, setModalAddVideo] = useState(null);
   const [modalAddSingleBlock, setModalAddSingleBlock] = useState(null);
-  const [modalAddTicket, setModalAddTicket] = useState(null)
+  const [modalAddTicket, setModalAddTicket] = useState(null);
+  const [modalAddTypebot, setModalAddTypebot] = useState(null);
 
   const connectionLineStyle = { stroke: "#2b2b2b", strokeWidth: "6px" };
 
@@ -167,46 +172,46 @@ export const FlowBuilderConfig = () => {
     const posX =
       nodes[nodes.length - 1].position.x + nodes[nodes.length - 1].width + 40;
     if (type === "start") {
-      return setNodes(old => {
+      return setNodes((old) => {
         return [
-          ...old.filter(item => item.id !== "1"),
+          ...old.filter((item) => item.id !== "1"),
           {
             id: "1",
             position: { x: posX, y: posY },
             data: { label: "Inicio do fluxo" },
-            type: "start"
-          }
+            type: "start",
+          },
         ];
       });
     }
     if (type === "text") {
-      return setNodes(old => {
+      return setNodes((old) => {
         return [
           ...old,
           {
             id: geraStringAleatoria(30),
             position: { x: posX, y: posY },
             data: { label: data.text },
-            type: "message"
-          }
+            type: "message",
+          },
         ];
       });
     }
     if (type === "interval") {
-      return setNodes(old => {
+      return setNodes((old) => {
         return [
           ...old,
           {
             id: geraStringAleatoria(30),
             position: { x: posX, y: posY },
             data: { label: `Intervalo ${data.sec} seg.`, sec: data.sec },
-            type: "interval"
-          }
+            type: "interval",
+          },
         ];
       });
     }
     if (type === "condition") {
-      return setNodes(old => {
+      return setNodes((old) => {
         return [
           ...old,
           {
@@ -215,15 +220,15 @@ export const FlowBuilderConfig = () => {
             data: {
               key: data.key,
               condition: data.condition,
-              value: data.value
+              value: data.value,
             },
-            type: "condition"
-          }
+            type: "condition",
+          },
         ];
       });
     }
     if (type === "menu") {
-      return setNodes(old => {
+      return setNodes((old) => {
         return [
           ...old,
           {
@@ -231,135 +236,151 @@ export const FlowBuilderConfig = () => {
             position: { x: posX, y: posY },
             data: {
               message: data.message,
-              arrayOption: data.arrayOption
+              arrayOption: data.arrayOption,
             },
-            type: "menu"
-          }
+            type: "menu",
+          },
         ];
       });
     }
     if (type === "img") {
-      return setNodes(old => {
+      return setNodes((old) => {
         return [
           ...old,
           {
             id: geraStringAleatoria(30),
             position: { x: posX, y: posY },
             data: { url: data.url },
-            type: "img"
-          }
+            type: "img",
+          },
         ];
       });
     }
     if (type === "audio") {
-      return setNodes(old => {
+      return setNodes((old) => {
         return [
           ...old,
           {
             id: geraStringAleatoria(30),
             position: { x: posX, y: posY },
             data: { url: data.url, record: data.record },
-            type: "audio"
-          }
+            type: "audio",
+          },
         ];
       });
     }
     if (type === "randomizer") {
-      return setNodes(old => {
+      return setNodes((old) => {
         return [
           ...old,
           {
             id: geraStringAleatoria(30),
             position: { x: posX, y: posY },
             data: { percent: data.percent },
-            type: "randomizer"
-          }
+            type: "randomizer",
+          },
         ];
       });
     }
     if (type === "video") {
-      return setNodes(old => {
+      return setNodes((old) => {
         return [
           ...old,
           {
             id: geraStringAleatoria(30),
             position: { x: posX, y: posY },
             data: { url: data.url },
-            type: "video"
-          }
+            type: "video",
+          },
         ];
       });
     }
     if (type === "singleBlock") {
-      return setNodes(old => {
+      return setNodes((old) => {
         return [
           ...old,
           {
             id: geraStringAleatoria(30),
             position: { x: posX, y: posY },
             data: { ...data },
-            type: "singleBlock"
-          }
+            type: "singleBlock",
+          },
         ];
       });
     }
 
     if (type === "ticket") {
-      return setNodes(old => {
+      return setNodes((old) => {
         return [
           ...old,
           {
             id: geraStringAleatoria(30),
             position: { x: posX, y: posY },
             data: { ...data },
-            type: "ticket"
-          }
+            type: "ticket",
+          },
         ];
       });
     }
 
-
+    if (type === "typebot") {
+      return setNodes((old) => {
+        return [
+          ...old,
+          {
+            id: geraStringAleatoria(30),
+            position: { x: posX, y: posY },
+            data: { ...data },
+            type: "typebot",
+          },
+        ];
+      });
+    }
   };
 
-  const textAdd = data => {
+  const textAdd = (data) => {
     addNode("text", data);
   };
 
-  const intervalAdd = data => {
+  const intervalAdd = (data) => {
     addNode("interval", data);
   };
 
-  const conditionAdd = data => {
+  const conditionAdd = (data) => {
     addNode("condition", data);
   };
 
-  const menuAdd = data => {
+  const menuAdd = (data) => {
     addNode("menu", data);
   };
 
-  const imgAdd = data => {
+  const imgAdd = (data) => {
     addNode("img", data);
   };
 
-  const audioAdd = data => {
+  const audioAdd = (data) => {
     addNode("audio", data);
   };
 
-  const randomizerAdd = data => {
+  const randomizerAdd = (data) => {
     addNode("randomizer", data);
   };
 
-  const videoAdd = data => {
+  const videoAdd = (data) => {
     addNode("video", data);
   };
 
-  const singleBlockAdd = data => {
+  const singleBlockAdd = (data) => {
     addNode("singleBlock", data);
   };
 
-  const ticketAdd = data => {
-    addNode("ticket", data)
-  }
+  const ticketAdd = (data) => {
+    addNode("ticket", data);
+  };
+
+  const typebotAdd = (data) => {
+    addNode("typebot", data);
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -383,11 +404,11 @@ export const FlowBuilderConfig = () => {
 
   useEffect(() => {
     if (storageItems.action === "delete") {
-      setNodes(old => old.filter(item => item.id !== storageItems.node));
-      setEdges(old => {
-        const newData = old.filter(item => item.source !== storageItems.node);
+      setNodes((old) => old.filter((item) => item.id !== storageItems.node));
+      setEdges((old) => {
+        const newData = old.filter((item) => item.source !== storageItems.node);
         const newClearTarget = newData.filter(
-          item => item.target !== storageItems.node
+          (item) => item.target !== storageItems.node
         );
         return newClearTarget;
       });
@@ -396,9 +417,9 @@ export const FlowBuilderConfig = () => {
     }
     if (storageItems.action === "duplicate") {
       const nodeDuplicate = nodes.filter(
-        item => item.id === storageItems.node
+        (item) => item.id === storageItems.node
       )[0];
-      const maioresX = nodes.map(node => node.position.x);
+      const maioresX = nodes.map((node) => node.position.x);
       const maiorX = Math.max(...maioresX);
       const finalY = nodes[nodes.length - 1].position.y;
       const nodeNew = {
@@ -406,22 +427,22 @@ export const FlowBuilderConfig = () => {
         id: geraStringAleatoria(30),
         position: {
           x: maiorX + 240,
-          y: finalY
+          y: finalY,
         },
         selected: false,
-        style: { backgroundColor: "#555555", padding: 0, borderRadius: 8 }
+        style: { backgroundColor: "#555555", padding: 0, borderRadius: 8 },
       };
-      setNodes(old => [...old, nodeNew]);
+      setNodes((old) => [...old, nodeNew]);
       storageItems.setNodesStorage("");
       storageItems.setAct("idle");
     }
   }, [storageItems.action]);
 
   const loadMore = () => {
-    setPageNumber(prevState => prevState + 1);
+    setPageNumber((prevState) => prevState + 1);
   };
 
-  const handleScroll = e => {
+  const handleScroll = (e) => {
     if (!hasMore || loading) return;
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
     if (scrollHeight - (scrollTop + 100) < clientHeight) {
@@ -433,7 +454,7 @@ export const FlowBuilderConfig = () => {
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   const onConnect = useCallback(
-    params => setEdges(eds => addEdge(params, eds)),
+    (params) => setEdges((eds) => addEdge(params, eds)),
     [setEdges]
   );
 
@@ -442,9 +463,9 @@ export const FlowBuilderConfig = () => {
       .post("/flowbuilder/flow", {
         idFlow: id,
         nodes: nodes,
-        connections: edges
+        connections: edges,
       })
-      .then(res => {
+      .then((res) => {
         toast.success("Fluxo salvo com sucesso");
       });
   };
@@ -477,41 +498,44 @@ export const FlowBuilderConfig = () => {
       setModalAddSingleBlock("edit");
     }
     if (node.type === "ticket") {
-      setModalAddTicket("edit")
+      setModalAddTicket("edit");
+    }
+    if (node.type === "typebot") {
+      setModalAddTypebot("edit");
     }
   };
 
   const clickNode = (event, node) => {
-    setNodes(old =>
-      old.map(item => {
+    setNodes((old) =>
+      old.map((item) => {
         if (item.id === node.id) {
           return {
             ...item,
-            style: { backgroundColor: "#0000FF", padding: 1, borderRadius: 8 }
+            style: { backgroundColor: "#0000FF", padding: 1, borderRadius: 8 },
           };
         }
         return {
           ...item,
-          style: { backgroundColor: "#13111C", padding: 0, borderRadius: 8 }
+          style: { backgroundColor: "#13111C", padding: 0, borderRadius: 8 },
         };
       })
     );
   };
   const clickEdge = (event, node) => {
-    setNodes(old =>
-      old.map(item => {
+    setNodes((old) =>
+      old.map((item) => {
         return {
           ...item,
-          style: { backgroundColor: "#13111C", padding: 0, borderRadius: 8 }
+          style: { backgroundColor: "#13111C", padding: 0, borderRadius: 8 },
         };
       })
     );
   };
 
-  const updateNode = dataAlter => {
-    console.log('DATA ALTER', dataAlter)
-    setNodes(old =>
-      old.map(itemNode => {
+  const updateNode = (dataAlter) => {
+    console.log(dataAlter)
+    setNodes((old) =>
+      old.map((itemNode) => {
         if (itemNode.id === dataAlter.id) {
           return dataAlter;
         }
@@ -528,71 +552,82 @@ export const FlowBuilderConfig = () => {
       icon: (
         <RocketLaunch
           sx={{
-            color: "#3ABA38"
+            color: "#3ABA38",
           }}
         />
       ),
       name: "Inicio",
-      type: "start"
+      type: "start",
     },
     {
       icon: (
         <LibraryBooks
           sx={{
-            color: "#EC5858"
+            color: "#EC5858",
           }}
         />
       ),
       name: "Conteúdo",
-      type: "content"
+      type: "content",
     },
     {
       icon: (
         <DynamicFeed
           sx={{
-            color: "#683AC8"
+            color: "#683AC8",
           }}
         />
       ),
       name: "Menu",
-      type: "menu"
+      type: "menu",
     },
     {
       icon: (
         <CallSplit
           sx={{
-            color: "#1FBADC"
+            color: "#1FBADC",
           }}
         />
       ),
       name: "Randomizador",
-      type: "random"
+      type: "random",
     },
     {
       icon: (
         <AccessTime
           sx={{
-            color: "#F7953B"
+            color: "#F7953B",
           }}
         />
       ),
       name: "Intervalo",
-      type: "interval"
+      type: "interval",
     },
     {
       icon: (
         <ConfirmationNumber
           sx={{
-            color: "#F7953B"
+            color: "#F7953B",
           }}
         />
       ),
       name: "Ticket",
-      type: "ticket"
-    }
+      type: "ticket",
+    },
+    {
+      icon: (
+        <SiOpenai
+          sx={{
+            color: "#F7953B",
+          }}
+        />
+      ),
+      name: "TypeBot",
+      type: "typebot",
+    },
   ];
 
-  const clickActions = type => {
+  const clickActions = (type) => {
     switch (type) {
       case "start":
         addNode("start");
@@ -610,7 +645,9 @@ export const FlowBuilderConfig = () => {
         setModalAddInterval("create");
         break;
       case "ticket":
-        setModalAddTicket("create")
+        setModalAddTicket("create");
+      case "typebot":
+        setModalAddTypebot("create");
       default:
     }
   };
@@ -687,6 +724,15 @@ export const FlowBuilderConfig = () => {
         onUpdate={updateNode}
         close={setModalAddTicket}
       />
+    
+      <FlowBuilderTypebotModal
+        open={modalAddTypebot}
+        onSave={typebotAdd}
+        data={dataNode}
+        onUpdate={updateNode}
+        close={setModalAddTypebot}
+      />
+
       <MainHeader>
         <Title>Desenhe seu fluxo</Title>
       </MainHeader>
@@ -705,22 +751,25 @@ export const FlowBuilderConfig = () => {
                 left: 16,
                 ".MuiSpeedDial-fab": {
                   backgroundColor: colorPrimary(),
-                  '&:hover': {
-                    backgroundColor: colorPrimary()
-                  }
-                }
+                  "&:hover": {
+                    backgroundColor: colorPrimary(),
+                  },
+                },
               }}
               icon={<SpeedDialIcon />}
               direction={"down"}
             >
-              {actions.map(action => (
+              {actions.map((action) => (
                 <SpeedDialAction
                   key={action.name}
                   icon={action.icon}
                   tooltipTitle={action.name}
                   tooltipOpen
                   tooltipPlacement={"right"}
-                  onClick={() => clickActions(action.type)}
+                  onClick={() => {
+                    console.log(action.type)
+                    clickActions(action.type)
+                  }}
                 />
               ))}
             </SpeedDial>
@@ -730,7 +779,7 @@ export const FlowBuilderConfig = () => {
               position: "absolute",
               justifyContent: "center",
               flexDirection: "row",
-              width: "100%"
+              width: "100%",
             }}
           >
             <Typography
@@ -756,7 +805,7 @@ export const FlowBuilderConfig = () => {
               width: "100%",
               height: "90%",
               position: "relative",
-              display: "flex"
+              display: "flex",
             }}
           >
             <ReactFlow
@@ -775,13 +824,13 @@ export const FlowBuilderConfig = () => {
               style={{
                 //backgroundImage: `url(${imgBackground})`,
                 //backgroundSize: "cover"
-                backgroundColor: "#F8F9FA"
+                backgroundColor: "#F8F9FA",
               }}
               edgeTypes={edgeTypes}
               variant={"cross"}
               defaultEdgeOptions={{
                 style: { color: "#ff0000", strokeWidth: "6px" },
-                animated: false
+                animated: false,
               }}
             >
               <Controls />
@@ -797,7 +846,7 @@ export const FlowBuilderConfig = () => {
                 position: "absolute",
                 bottom: 0,
                 right: 0,
-                zIndex: 1111
+                zIndex: 1111,
               }}
             />
             {/* <Stack

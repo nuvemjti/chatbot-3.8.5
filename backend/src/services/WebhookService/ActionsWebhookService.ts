@@ -37,6 +37,9 @@ import CreateLogTicketService from "../TicketServices/CreateLogTicketService";
 import CompaniesSettings from "../../models/CompaniesSettings";
 import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
 import { delay } from "bluebird";
+import typebotListener from "../TypebotServices/typebotListener";
+import { getWbot } from "../../libs/wbot";
+import { proto } from "@whiskeysockets/baileys";
 
 interface IAddContact {
   companyId: number;
@@ -58,7 +61,8 @@ export const ActionsWebhookService = async (
   hashWebhookId: string,
   pressKey?: string,
   idTicket?: number,
-  numberPhrase: "" | { number: string; name: string; email: string } = ""
+  numberPhrase: "" | { number: string; name: string; email: string } = "",
+  msg?: proto.IWebMessageInfo
 ): Promise<string> => {
   try {
     const io = getIO()
@@ -254,9 +258,15 @@ export const ActionsWebhookService = async (
         await intervalWhats("1");
       }
 
+      if(nodeSelected.type === "typebot"){
+        const wbot = getWbot(whatsapp.id)
+        console.log("|============== NODE TYPEBOT ============|", nodeSelected.data.typebotIntegration)
+        await typebotListener({wbot: wbot, msg, ticket, typebot: nodeSelected.data.typebotIntegration})
+      }
+
       if (nodeSelected.type === "ticket") {
 
-        console.log("|================ TICKET ==================|")
+
         const queueId = nodeSelected.data?.data?.id || nodeSelected.data?.id
         const queue = await ShowQueueService(queueId, companyId)
 
@@ -718,7 +728,7 @@ export const ActionsWebhookService = async (
             where: { id: idTicket, whatsappId, companyId: companyId }
           });
           await ticket.update({
-            lastFlowId: null,
+            lastFlowId: nodeSelected.id,
             dataWebhook: {
               status: "process",
             },

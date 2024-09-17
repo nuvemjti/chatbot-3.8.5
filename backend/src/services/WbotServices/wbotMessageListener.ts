@@ -6,6 +6,7 @@ import fs from "fs";
 import * as Sentry from "@sentry/node";
 import { isNil, isNull } from "lodash";
 import { REDIS_URI_MSG_CONN } from "../../config/redis";
+import axios from "axios";
 
 import {
   downloadMediaMessage,
@@ -2322,9 +2323,6 @@ const flowbuilderIntegration = async (
 
   const whatsapp = await ShowWhatsAppService(wbot.id!, companyId);
 
-
-  console.log("whatsappId", whatsapp.id)
-
   const listPhrase = await FlowCampaignModel.findAll({
     where: {
       whatsappId: whatsapp.id,
@@ -2388,7 +2386,8 @@ const flowbuilderIntegration = async (
         "",
         null,
         ticket.id,
-        mountDataContact
+        mountDataContact,
+        msg
       );
 
     }
@@ -2440,7 +2439,8 @@ const flowbuilderIntegration = async (
         "",
         null,
         ticket.id,
-        mountDataContact
+        mountDataContact,
+        msg
       );
 
     }
@@ -2449,7 +2449,6 @@ const flowbuilderIntegration = async (
 
   // Campaign fluxo
   if (listPhrase.filter(item => item.phrase === body).length !== 0) {
-    console.log("2470", "handleMessageIntegration")
     const flowDispar = listPhrase.filter(item => item.phrase === body)[0];
     const flow = await FlowBuilderModel.findOne({
       where: {
@@ -2559,7 +2558,7 @@ const flowbuilderIntegration = async (
         ticket.id
       );
     } else {
-      console.log("2586", "handleMessageIntegration")
+
       const flow = await FlowBuilderModel.findOne({
         where: {
           id: ticket.flowStopped
@@ -2613,7 +2612,8 @@ const flowbuilderIntegration = async (
         "",
         body,
         ticket.id,
-        mountDataContact
+        mountDataContact,
+        msg
       );
     }
   }
@@ -2698,8 +2698,6 @@ export const handleMessageIntegration = async (
   }else if (
     queueIntegration.type === "flowbuilder"
   ){
-    
-    console.log("|============== FLOWBUILDER =============|")
 
     if (      
       !isMenu &&
@@ -2767,7 +2765,8 @@ const flowBuilderQueue = async (
     "",
     body,
     ticket.id,
-    mountDataContact
+    mountDataContact,
+    msg
   );
 
   //const integrations = await ShowQueueIntegrationService(whatsapp.integrationId, companyId);
@@ -3255,6 +3254,61 @@ const handleMessage = async (
       await handleMessageIntegration(msg, wbot, companyId, integrations, ticket, isMenu, whatsapp, contact, isFirstMsg)
     }
 
+    
+    if(
+      !isNil(ticket.typebotSessionId) &&
+      ticket.typebotStatus &&
+      !msg.key.fromMe &&
+      !isNil(ticket.typebotSessionTime) &&
+      ticket.useIntegration
+    ){
+
+      console.log("|================== CONTINUE TYPEBO ==============|")
+      const flow = await FlowBuilderModel.findOne({
+        where: {
+          id: ticket.flowStopped
+        }
+      });
+      const nodes: INodes[] = flow.flow["nodes"];
+      const lastFlow = nodes.find(f => f.id === ticket.lastFlowId)
+      const typebot = lastFlow.data.typebotIntegration
+
+      const { urlN8N: url,
+        typebotExpires,
+        typebotKeywordFinish,
+        typebotKeywordRestart,
+        typebotUnknownMessage,
+        typebotSlug,
+        typebotDelayMessage,
+        typebotRestartMessage
+    } = typebot;
+
+    /*
+    const body = getBodyMessage(msg);
+
+    const reqData = JSON.stringify({
+      "message": body
+    });
+
+    let config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: `${url}/api/v1/sessions/${ticket.typebotSessionId}/continueChat`,
+      headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+      },
+      data: reqData
+    };
+    
+    let requestContinue = await axios.request(config);
+
+    */
+
+      //console.log({ lastFlow })
+      await typebotListener({wbot: wbot, msg, ticket, typebot: lastFlow.data.typebotIntegration})
+      return
+    }
     if (
       !ticket.imported &&
       !msg.key.fromMe &&
