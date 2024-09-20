@@ -92,6 +92,7 @@ import { WebhookModel } from "../../models/Webhook";
 import { add, differenceInMilliseconds } from "date-fns";
 import { FlowCampaignModel } from "../../models/FlowCampaign";
 import ShowTicketService from "../TicketServices/ShowTicketService";
+import { handleOpenAi } from "../IntegrationsServices/OpenAiService";
 
 const os = require("os");
 
@@ -1970,7 +1971,7 @@ const deleteFileSync = (path: string): void => {
   }
 };
 
-const convertTextToSpeechAndSaveToFile = (
+export const convertTextToSpeechAndSaveToFile = (
   text: string,
   filename: string,
   subscriptionKey: string,
@@ -2033,208 +2034,12 @@ const convertWavToAnotherFormat = (
   });
 };
 
-const keepOnlySpecifiedChars = (str: string) => {
+export const keepOnlySpecifiedChars = (str: string) => {
   return str.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚâêîôûÂÊÎÔÛãõÃÕçÇ!?.,;:\s]/g, "");
 };
 
-const handleOpenAi = async (
-  msg: proto.IWebMessageInfo,
-  wbot: Session,
-  ticket: Ticket,
-  contact: Contact,
-  mediaSent: Message | undefined,
-  ticketTraking: TicketTraking
-): Promise<void> => {
 
-  // REGRA PARA DESABILITAR O BOT PARA ALGUM CONTATO
-  if (contact.disableBot) {
-    return;
-  }
-  const bodyMessage = getBodyMessage(msg);
-  if (!bodyMessage) return;
-  // console.log("GETTING WHATSAPP HANDLE OPENAI", ticket.whatsappId, ticket.id)
-  const { prompt } = await ShowWhatsAppService(wbot.id, ticket.companyId);
-
-
-  if (!prompt) return;
-
-  if (msg.messageStubType) return;
-
-  const publicFolder: string = path.resolve(
-    __dirname,
-    "..",
-    "..",
-    "..",
-    "public",
-    `company${ticket.companyId}`
-  );
-
-  let openai: OpenAI | any;
-  const openAiIndex = sessionsOpenAi.findIndex(s => s.id === ticket.id);
-
-  if (openAiIndex === -1) {
-    // const configuration = new Configuration({
-    //   apiKey: prompt.apiKey
-    // });
-    openai = new OpenAI({ apiKey: prompt.apiKey });
-    openai.id = ticket.id;
-    sessionsOpenAi.push(openai);
-  } else {
-    openai = sessionsOpenAi[openAiIndex];
-  }
-
-  const messages = await Message.findAll({
-    where: { ticketId: ticket.id },
-    order: [["createdAt", "ASC"]],
-    limit: prompt.maxMessages
-  });
-
-  const promptSystem = `Nas respostas utilize o nome ${sanitizeName(
-    contact.name || "Amigo(a)"
-  )} para identificar o cliente.\nSua resposta deve usar no máximo ${prompt.maxTokens
-    } tokens e cuide para não truncar o final.\nSempre que possível, mencione o nome dele para ser mais personalizado o atendimento e mais educado. Quando a resposta requer uma transferência para o setor de atendimento, comece sua resposta com 'Ação: Transferir para o setor de atendimento'.\n
-  ${prompt.prompt}\n`;
-
-  let messagesOpenAi = [];
-
-  if (msg.message?.conversation || msg.message?.extendedTextMessage?.text) {
-    messagesOpenAi = [];
-    messagesOpenAi.push({ role: "system", content: promptSystem });
-    for (
-      let i = 0;
-      i < Math.min(prompt.maxMessages, messages.length);
-      i++
-    ) {
-      const message = messages[i];
-      if (message.mediaType === "conversation" || message.mediaType === "extendedTextMessage") {
-        if (message.fromMe) {
-          messagesOpenAi.push({ role: "assistant", content: message.body });
-        } else {
-          messagesOpenAi.push({ role: "user", content: message.body });
-        }
-      }
-    }
-    messagesOpenAi.push({ role: "user", content: bodyMessage! });
-
-    const chat = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo-1106",
-      messages: messagesOpenAi,
-      max_tokens: prompt.maxTokens,
-      temperature: prompt.temperature
-    });
-
-    let response = chat.choices[0].message?.content;
-
-    if (response?.includes("Ação: Transferir para o setor de atendimento")) {
-      await transferQueue(prompt.queueId, ticket, contact);
-      response = response
-        .replace("Ação: Transferir para o setor de atendimento", "")
-        .trim();
-    }
-
-    if (prompt.voice === "texto") {
-      const sentMessage = await wbot.sendMessage(msg.key.remoteJid!, {
-        text: `\u200e ${response!}`
-      });
-      await verifyMessage(sentMessage!, ticket, contact);
-    } else {
-      const fileNameWithOutExtension = `${ticket.id}_${Date.now()}`;
-      convertTextToSpeechAndSaveToFile(
-        keepOnlySpecifiedChars(response!),
-        `${publicFolder}/${fileNameWithOutExtension}`,
-        prompt.voiceKey,
-        prompt.voiceRegion,
-        prompt.voice,
-        "mp3"
-      ).then(async () => {
-        try {
-          const sendMessage = await wbot.sendMessage(msg.key.remoteJid!, {
-            audio: { url: `${publicFolder}/${fileNameWithOutExtension}.mp3` },
-            mimetype: "audio/mpeg",
-            ptt: true
-          });
-          await verifyMediaMessage(sendMessage!, ticket, contact, ticketTraking, false, false, wbot);
-          deleteFileSync(`${publicFolder}/${fileNameWithOutExtension}.mp3`);
-          deleteFileSync(`${publicFolder}/${fileNameWithOutExtension}.wav`);
-        } catch (error) {
-          console.log(`Erro para responder com audio: ${error}`);
-        }
-      });
-    }
-  } else if (msg.message?.audioMessage) {
-    const mediaUrl = mediaSent!.mediaUrl!.split("/").pop();
-    const file = fs.createReadStream(`${publicFolder}/${mediaUrl}`) as any;
-
-    const transcription = await openai.audio.transcriptions.create({
-      model: "whisper-1",
-      file: file,
-    });
-
-    messagesOpenAi = [];
-    messagesOpenAi.push({ role: "system", content: promptSystem });
-    for (
-      let i = 0;
-      i < Math.min(prompt.maxMessages, messages.length);
-      i++
-    ) {
-      const message = messages[i];
-      if (message.mediaType === "conversation" || message.mediaType === "extendedTextMessage") {
-        if (message.fromMe) {
-          messagesOpenAi.push({ role: "assistant", content: message.body });
-        } else {
-          messagesOpenAi.push({ role: "user", content: message.body });
-        }
-      }
-    }
-    messagesOpenAi.push({ role: "user", content: transcription.text });
-    const chat = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo-1106",
-      messages: messagesOpenAi,
-      max_tokens: prompt.maxTokens,
-      temperature: prompt.temperature
-    });
-    let response = chat.choices[0].message?.content;
-
-    if (response?.includes("Ação: Transferir para o setor de atendimento")) {
-      await transferQueue(prompt.queueId, ticket, contact);
-      response = response
-        .replace("Ação: Transferir para o setor de atendimento", "")
-        .trim();
-    }
-    if (prompt.voice === "texto") {
-      const sentMessage = await wbot.sendMessage(msg.key.remoteJid!, {
-        text: `\u200e ${response!}`
-      });
-      await verifyMessage(sentMessage!, ticket, contact);
-    } else {
-      const fileNameWithOutExtension = `${ticket.id}_${Date.now()}`;
-      convertTextToSpeechAndSaveToFile(
-        keepOnlySpecifiedChars(response!),
-        `${publicFolder}/${fileNameWithOutExtension}`,
-        prompt.voiceKey,
-        prompt.voiceRegion,
-        prompt.voice,
-        "mp3"
-      ).then(async () => {
-        try {
-          const sendMessage = await wbot.sendMessage(msg.key.remoteJid!, {
-            audio: { url: `${publicFolder}/${fileNameWithOutExtension}.mp3` },
-            mimetype: "audio/mpeg",
-            ptt: true
-          });
-          await verifyMediaMessage(sendMessage!, ticket, contact, ticketTraking, false, false, wbot);
-          deleteFileSync(`${publicFolder}/${fileNameWithOutExtension}.mp3`);
-          deleteFileSync(`${publicFolder}/${fileNameWithOutExtension}.wav`);
-        } catch (error) {
-          console.log(`Erro para responder com audio: ${error}`);
-        }
-      });
-    }
-  }
-  messagesOpenAi = [];
-};
-
-const transferQueue = async (
+export const transferQueue = async (
   queueId: number,
   ticket: Ticket,
   contact: Contact
@@ -3210,6 +3015,8 @@ const handleMessage = async (
     }
     
        //openai na conexao
+
+      
        if (
         !ticket.queue &&
         !isGroup &&
@@ -3217,8 +3024,11 @@ const handleMessage = async (
         !ticket.userId &&
         !isNil(whatsapp.promptId)
       ) {
-        await handleOpenAi(msg, wbot, ticket, contact, mediaSent, ticketTraking);
+
+        const { prompt } = whatsapp
+        await handleOpenAi(prompt, msg, wbot, ticket, contact, mediaSent, ticketTraking);
       }
+    
 
 
     //integraçao na conexao
