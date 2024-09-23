@@ -561,7 +561,6 @@ export const FlowBuilderConfig = () => {
   };
 
   const updateNode = (dataAlter) => {
-    console.log(dataAlter);
     setNodes((old) =>
       old.map((itemNode) => {
         if (itemNode.id === dataAlter.id) {
@@ -573,6 +572,8 @@ export const FlowBuilderConfig = () => {
     setModalAddText(null);
     setModalAddInterval(null);
     setModalAddMenu(null);
+    setModalAddOpenAI(null);
+    setModalAddTypebot(null);
   };
 
   const actions = [
@@ -692,6 +693,7 @@ export const FlowBuilderConfig = () => {
         setModalAddTicket("create");
       case "typebot":
         setModalAddTypebot("create");
+        break;
       case "openai":
         setModalAddOpenAI("create");
       default:
