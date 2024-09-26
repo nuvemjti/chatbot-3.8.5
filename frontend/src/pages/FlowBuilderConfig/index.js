@@ -45,6 +45,7 @@ import {
 } from "@mui/material";
 import { useParams } from "react-router-dom/cjs/react-router-dom.min";
 import { Box, CircularProgress } from "@material-ui/core";
+import BallotIcon from '@mui/icons-material/Ballot';
 
 import "reactflow/dist/style.css";
 
@@ -434,8 +435,12 @@ export const FlowBuilderConfig = () => {
         try {
           const { data } = await api.get(`/flowbuilder/flow/${id}`);
           if (data.flow.flow !== null) {
-            setNodes(data.flow.flow.nodes);
+            const flowNodes = data.flow.flow.nodes
+            setNodes(flowNodes);
             setEdges(data.flow.flow.connections);
+            const filterVariables = flowNodes.filter(nd  => nd.type === "question")
+            const variables = filterVariables.map(variable => variable.data.typebotIntegration.answerKey)
+            localStorage.setItem('variables', JSON.stringify(variables))
           }
           setLoading(false);
         } catch (err) {
@@ -693,13 +698,13 @@ export const FlowBuilderConfig = () => {
     },
     {
       icon: (
-        <HiOutlinePuzzle
+        <BallotIcon
           sx={{
             color: "#F7953B",
           }}
         />
       ),
-      name: "Perguta",
+      name: "Pergunta",
       type: "question",
     },
   ];

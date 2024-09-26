@@ -14,6 +14,8 @@ import React, { memo } from "react";
 import { Handle } from "react-flow-renderer";
 import { useNodeStorage } from "../../../stores/useNodeStorage";
 import { Typography } from "@mui/material";
+import BallotIcon from '@mui/icons-material/Ballot';
+
 
 export default memo(({ data, isConnectable, id }) => {
   const storageItems = useNodeStorage();
@@ -86,7 +88,7 @@ export default memo(({ data, isConnectable, id }) => {
           display: "flex",
         }}
       >
-        <LibraryBooks
+        <BallotIcon
           sx={{
             width: "16px",
             height: "16px",
@@ -107,7 +109,7 @@ export default memo(({ data, isConnectable, id }) => {
                     justifyContent: "center"
                   }}
                 >
-                  <Message sx={{ color: "#EC5858" }} />
+                  <BallotIcon sx={{ color: "#EC5858" }} />
                 </div>
                 <Typography
                   textAlign={"center"}

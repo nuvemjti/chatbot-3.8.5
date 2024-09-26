@@ -64,14 +64,14 @@ const FlowBuilderAddQuestionModal = ({
   const [activeModal, setActiveModal] = useState(false);
   const [integration, setIntegration] = useState();
   const [labels, setLabels] = useState({
-    title: "Adicionar OpenAI ao fluxo",
+    title: "Adicionar Perguta ao fluxo",
     btn: "Adicionar",
   });
 
   useEffect(() => {
     if (open === "edit") {
       setLabels({
-        title: "Editar OpenAI do fluxo",
+        title: "Editar Perguta do fluxo",
         btn: "Salvar",
       });
       console.log("FlowTybebotEdit", data.data.typebotIntegration);
@@ -82,7 +82,7 @@ const FlowBuilderAddQuestionModal = ({
       setActiveModal(true);
     } else if (open === "create") {
       setLabels({
-        title: "Cria OpenAI no fluxo",
+        title: "Cria Perguta no fluxo",
         btn: "Salvar",
       });
       setIntegration(initialState);
@@ -100,6 +100,20 @@ const FlowBuilderAddQuestionModal = ({
   };
 
   const handleSavePrompt = (values) => {
+    let oldVariable = localStorage.getItem("variables")
+    console.log({ oldVariable })
+
+    const oldNameKey = data.data.typebotIntegration.answerKey
+    if(oldVariable){
+      oldVariable = JSON.parse(oldVariable)
+    }else{
+      oldVariable = []
+    }
+
+    console.log("new valeukey", values.answerKey)
+    oldVariable = oldVariable.filter(item => item !== oldNameKey)
+    localStorage.setItem('variables', JSON.stringify([...oldVariable, values.answerKey]))    
+
     if (open === "edit") {
       handleClose();
       onUpdate({
@@ -127,7 +141,7 @@ const FlowBuilderAddQuestionModal = ({
         scroll="paper"
       >
         <DialogTitle id="form-dialog-title">
-          {open === "create" ? `Adicionar OpenAI ao fluxo` : `Editar OpenAI`}
+          {open === "create" ? `Adicionar Perguta ao fluxo` : `Editar Perguta`}
         </DialogTitle>
         <Formik
           initialValues={integration}
