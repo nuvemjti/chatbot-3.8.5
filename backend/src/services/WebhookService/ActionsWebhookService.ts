@@ -180,22 +180,6 @@ export const ActionsWebhookService = async (
     for (var i = 0; i < lengthLoop; i++) {
       let nodeSelected: any;
       let ticketInit: Ticket;
-      if (idTicket) {
-        console.log("UPDATE1...");
-        ticketInit = await Ticket.findOne({
-          where: { id: idTicket, whatsappId }
-        });
-
-        if (ticketInit.status === "closed") {
-          break;
-        } else {
-          await ticketInit.update({
-            dataWebhook: {
-              status: "process"
-            }
-          });
-        }
-      }
 
       if (pressKey) {
         console.log("UPDATE2...");
@@ -229,30 +213,20 @@ export const ActionsWebhookService = async (
           nodeSelected = otherNode;
         }
       }
-
+        
       if (nodeSelected.type === "message") {
+        
         let msg;
-        if (dataWebhook === "") {
+        
+        const webhook = ticket.dataWebhook
+
+        if (webhook && webhook.hasOwnProperty("variables")) {
           msg = {
-            body: nodeSelected.data.label,
-            number: numberClient,
-            companyId: companyId
+            body: replaceMessages(webhook, nodeSelected.data.label)
           };
         } else {
-          const dataLocal = {
-            nome: createFieldJsonName,
-            numero: numberClient,
-            email: createFieldJsonEmail
-          };
           msg = {
-            body: replaceMessages(
-              nodeSelected.data.label,
-              details,
-              dataWebhook,
-              dataLocal
-            ),
-            number: numberClient,
-            companyId: companyId
+            body: nodeSelected.data.label
           };
         }
 
@@ -260,6 +234,8 @@ export const ActionsWebhookService = async (
           number: numberClient,
           body: msg.body
         });
+        
+
         //TESTE BOTÃO
         //await SendMessageFlow(whatsapp, {
         //  number: numberClient,
@@ -267,8 +243,9 @@ export const ActionsWebhookService = async (
         //} )
         await intervalWhats("1");
       }
-
+      console.log("273");
       if (nodeSelected.type === "typebot") {
+        console.log("275");
         const wbot = getWbot(whatsapp.id);
         await typebotListener({
           wbot: wbot,
@@ -327,6 +304,42 @@ export const ActionsWebhookService = async (
           null,
           ticketTraking
         );
+      }
+
+      if (nodeSelected.type === "question") {
+        const webhook = ticket?.dataWebhook;
+        const variables = ticket?.dataWebhook?.variables;
+
+        if (!variables || variables === undefined || variables === null) {
+          const { message } = nodeSelected.data.typebotIntegration;
+          const ticketDetails = await ShowTicketService(ticket.id, companyId);
+
+          const bodyFila = formatBody(`${message}`, ticket.contact);
+
+          await delay(3000);
+          await typeSimulation(ticket, "composing");
+
+          await SendWhatsAppMessage({
+            body: bodyFila,
+            ticket: ticketDetails,
+            quotedMsg: null
+          });
+
+          SetTicketMessagesAsRead(ticketDetails);
+
+          await ticketDetails.update({
+            lastMessage: bodyFila
+          });
+
+          await ticket.update({
+            userId: null,
+            companyId: companyId,
+            lastFlowId: nodeSelected.id,
+            hashFlowId: hashWebhookId,
+            flowStopped: idFlowDb.toString()
+          });
+        }
+        break;
       }
 
       if (nodeSelected.type === "ticket") {
@@ -416,66 +429,25 @@ export const ActionsWebhookService = async (
         for (var iLoc = 0; iLoc < nodeSelected.data.seq.length; iLoc++) {
           const elementNowSelected = nodeSelected.data.seq[iLoc];
 
-          let ticketUpdate = await Ticket.findOne({
+          ticket = await Ticket.findOne({
             where: { id: idTicket, companyId }
           });
 
-          if (ticketUpdate.status === "open") {
-            pressKey = "999";
-            execFn = undefined;
-
-            await ticket.update({
-              lastFlowId: null,
-              dataWebhook: null,
-              queueId: null,
-              hashFlowId: null,
-              flowWebhook: false,
-              flowStopped: null
-            });
-            break;
-          }
-
-          if (ticketUpdate.status === "closed") {
-            pressKey = "999";
-            execFn = undefined;
-
-            await ticket.reload();
-
-            io.of(String(companyId))
-              // .to(oldStatus)
-              // .to(ticketId.toString())
-              .emit(`company-${ticket.companyId}-ticket`, {
-                action: "delete",
-                ticketId: ticket.id
-              });
-
-            break;
-          }
-
           if (elementNowSelected.includes("message")) {
-            // await SendMessageFlow(whatsapp, {
-            //   number: numberClient,
-            //   body: nodeSelected.data.elements.filter(
-            //     item => item.number === elementNowSelected
-            //   )[0].value
-            // });
             const bodyFor = nodeSelected.data.elements.filter(
               item => item.number === elementNowSelected
             )[0].value;
 
-            const ticketDetails = await ShowTicketService(ticket.id, companyId);
+            const ticketDetails = await ShowTicketService(idTicket, companyId);
 
             let msg;
 
-            if (dataWebhook === "") {
-              msg = bodyFor;
+            const webhook = ticket.dataWebhook;
+
+            if (webhook && webhook.hasOwnProperty("variables")) {
+              msg = replaceMessages(webhook.variables, bodyFor);
             } else {
-              const dataLocal = {
-                nome: createFieldJsonName,
-                numero: numberClient,
-                email: createFieldJsonEmail
-              };
-              msg = replaceMessages(bodyFor, details, dataWebhook, dataLocal);
+              msg = bodyFor;
             }
 
             await delay(3000);
@@ -610,6 +582,7 @@ export const ActionsWebhookService = async (
       let isMenu: boolean;
 
       if (nodeSelected.type === "menu") {
+        console.log(650, "menu");
         if (pressKey) {
           const filterOne = connectStatic.filter(
             confil => confil.source === next
@@ -633,13 +606,14 @@ export const ActionsWebhookService = async (
           pressKey = "999";
 
           const isNodeExist = nodes.filter(item => item.id === execFn);
-
+          console.log(674, "menu");
           if (isNodeExist.length > 0) {
             isMenu = isNodeExist[0].type === "menu" ? true : false;
           } else {
             isMenu = false;
           }
         } else {
+          console.log(681, "menu");
           let optionsMenu = "";
           nodeSelected.data.arrayOption.map(item => {
             optionsMenu += `[${item.number}] ${item.value}\n`;
@@ -647,26 +621,18 @@ export const ActionsWebhookService = async (
 
           const menuCreate = `${nodeSelected.data.message}\n\n${optionsMenu}`;
 
+          const webhook = ticket.dataWebhook;
+
           let msg;
-          if (dataWebhook === "") {
+          if (webhook && webhook.hasOwnProperty("variables")) {
             msg = {
-              body: menuCreate,
+              body: replaceMessages(webhook, menuCreate),
               number: numberClient,
               companyId: companyId
             };
           } else {
-            const dataLocal = {
-              nome: createFieldJsonName,
-              numero: numberClient,
-              email: createFieldJsonEmail
-            };
             msg = {
-              body: replaceMessages(
-                menuCreate,
-                details,
-                dataWebhook,
-                dataLocal
-              ),
+              body: menuCreate,
               number: numberClient,
               companyId: companyId
             };
@@ -794,9 +760,6 @@ export const ActionsWebhookService = async (
           });
           await ticket.update({
             lastFlowId: nodeSelected.id,
-            dataWebhook: {
-              status: "process"
-            },
             hashFlowId: null,
             flowWebhook: false,
             flowStopped: idFlowDb.toString()
@@ -836,7 +799,6 @@ export const ActionsWebhookService = async (
         companyId: companyId,
         flowWebhook: true,
         lastFlowId: nodeSelected.id,
-        dataWebhook: dataWebhook,
         hashFlowId: hashWebhookId,
         flowStopped: idFlowDb.toString()
       });
@@ -884,7 +846,14 @@ const intervalWhats = (time: string) => {
   return new Promise(resolve => setTimeout(resolve, seconds));
 };
 
-const replaceMessages = (
+const replaceMessages = (variables, message) => {
+  return message.replace(
+    /{{\s*([^{}\s]+)\s*}}/g,
+    (match, key) => variables[key] || ""
+  );
+};
+
+const replaceMessagesOld = (
   message: string,
   details: any,
   dataWebhook: any,

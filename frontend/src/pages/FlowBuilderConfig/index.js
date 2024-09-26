@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import { SiOpenai } from "react-icons/si";
 import typebotIcon from "../../assets/typebot-ico.png";
+import { HiOutlinePuzzle } from "react-icons/hi";
 
 import { toast } from "react-toastify";
 import { useHistory } from "react-router-dom";
@@ -14,6 +15,18 @@ import { useHistory } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
 import Button from "@material-ui/core/Button";
+
+import audioNode from "./nodes/audioNode";
+import typebotNode from "./nodes/typebotNode";
+import openaiNode from "./nodes/openaiNode";
+import messageNode from "./nodes/messageNode.js";
+import startNode from "./nodes/startNode";
+import menuNode from "./nodes/menuNode";
+import intervalNode from "./nodes/intervalNode";
+import imgNode from "./nodes/imgNode";
+import randomizerNode from "./nodes/randomizerNode";
+import videoNode from "./nodes/videoNode";
+import questionNode from "./nodes/questionNode";
 
 import api from "../../services/api";
 
@@ -32,7 +45,6 @@ import {
 } from "@mui/material";
 import { useParams } from "react-router-dom/cjs/react-router-dom.min";
 import { Box, CircularProgress } from "@material-ui/core";
-import messageNode from "./nodes/messageNode.js";
 
 import "reactflow/dist/style.css";
 
@@ -48,13 +60,6 @@ import ReactFlow, {
 } from "react-flow-renderer";
 import FlowBuilderAddTextModal from "../../components/FlowBuilderAddTextModal";
 import FlowBuilderIntervalModal from "../../components/FlowBuilderIntervalModal";
-import startNode from "./nodes/startNode";
-import conditionNode from "./nodes/conditionNode";
-import menuNode from "./nodes/menuNode";
-import intervalNode from "./nodes/intervalNode";
-import imgNode from "./nodes/imgNode";
-import randomizerNode from "./nodes/randomizerNode";
-import videoNode from "./nodes/videoNode";
 import FlowBuilderConditionModal from "../../components/FlowBuilderConditionModal";
 import FlowBuilderMenuModal from "../../components/FlowBuilderMenuModal";
 import {
@@ -74,10 +79,6 @@ import FlowBuilderAddImgModal from "../../components/FlowBuilderAddImgModal";
 import FlowBuilderTicketModal from "../../components/FlowBuilderAddTicketModal";
 import FlowBuilderAddAudioModal from "../../components/FlowBuilderAddAudioModal";
 
-import audioNode from "./nodes/audioNode";
-import typebotNode from "./nodes/typebotNode";
-import openaiNode from "./nodes/openaiNode";
-
 import { useNodeStorage } from "../../stores/useNodeStorage";
 import FlowBuilderRandomizerModal from "../../components/FlowBuilderRandomizerModal";
 import FlowBuilderAddVideoModal from "../../components/FlowBuilderAddVideoModal";
@@ -88,6 +89,7 @@ import ticketNode from "./nodes/ticketNode";
 import { ConfirmationNumber } from "@material-ui/icons";
 import FlowBuilderTypebotModal from "../../components/FlowBuilderAddTypebotModal";
 import FlowBuilderOpenAIModal from "../../components/FlowBuilderAddOpenAIModal";
+import FlowBuilderAddQuestionModal from "../../components/FlowBuilderAddQuestionModal";
 
 const useStyles = makeStyles((theme) => ({
   mainPaper: {
@@ -118,7 +120,6 @@ function geraStringAleatoria(tamanho) {
 const nodeTypes = {
   message: messageNode,
   start: startNode,
-  condition: conditionNode,
   menu: menuNode,
   interval: intervalNode,
   img: imgNode,
@@ -129,6 +130,7 @@ const nodeTypes = {
   ticket: ticketNode,
   typebot: typebotNode,
   openai: openaiNode,
+  question: questionNode,
 };
 
 const edgeTypes = {
@@ -161,7 +163,6 @@ export const FlowBuilderConfig = () => {
   const [hasMore, setHasMore] = useState(false);
   const [modalAddText, setModalAddText] = useState(null);
   const [modalAddInterval, setModalAddInterval] = useState(false);
-  const [modalAddCondition, setModalAddCondition] = useState(null);
   const [modalAddMenu, setModalAddMenu] = useState(null);
   const [modalAddImg, setModalAddImg] = useState(null);
   const [modalAddAudio, setModalAddAudio] = useState(null);
@@ -171,6 +172,7 @@ export const FlowBuilderConfig = () => {
   const [modalAddTicket, setModalAddTicket] = useState(null);
   const [modalAddTypebot, setModalAddTypebot] = useState(null);
   const [modalAddOpenAI, setModalAddOpenAI] = useState(null);
+  const [modalAddQuestion, setModalAddQuestion] = useState(null);
 
   const connectionLineStyle = { stroke: "#2b2b2b", strokeWidth: "6px" };
 
@@ -357,6 +359,20 @@ export const FlowBuilderConfig = () => {
         ];
       });
     }
+
+    if (type === "question") {
+      return setNodes((old) => {
+        return [
+          ...old,
+          {
+            id: geraStringAleatoria(30),
+            position: { x: posX, y: posY },
+            data: { ...data },
+            type: "question",
+          },
+        ];
+      });
+    }
   };
 
   const textAdd = (data) => {
@@ -405,6 +421,10 @@ export const FlowBuilderConfig = () => {
 
   const openaiAdd = (data) => {
     addNode("openai", data);
+  };
+
+  const questionAdd = (data) => {
+    addNode("question", data);
   };
 
   useEffect(() => {
@@ -504,9 +524,7 @@ export const FlowBuilderConfig = () => {
     if (node.type === "interval") {
       setModalAddInterval("edit");
     }
-    if (node.type === "condition") {
-      setModalAddCondition("edit");
-    }
+
     if (node.type === "menu") {
       setModalAddMenu("edit");
     }
@@ -530,6 +548,9 @@ export const FlowBuilderConfig = () => {
     }
     if (node.type === "openai") {
       setModalAddOpenAI("edit");
+    }
+    if (node.type === "question") {
+      setModalAddQuestion("edit");
     }
   };
 
@@ -670,6 +691,17 @@ export const FlowBuilderConfig = () => {
       name: "OpenAI",
       type: "openai",
     },
+    {
+      icon: (
+        <HiOutlinePuzzle
+          sx={{
+            color: "#F7953B",
+          }}
+        />
+      ),
+      name: "Perguta",
+      type: "question",
+    },
   ];
 
   const clickActions = (type) => {
@@ -696,6 +728,8 @@ export const FlowBuilderConfig = () => {
         break;
       case "openai":
         setModalAddOpenAI("create");
+      case "question":
+        setModalAddQuestion("create");
       default:
     }
   };
@@ -715,13 +749,6 @@ export const FlowBuilderConfig = () => {
         data={dataNode}
         onUpdate={updateNode}
         close={setModalAddInterval}
-      />
-      <FlowBuilderConditionModal
-        open={modalAddCondition}
-        onSave={conditionAdd}
-        data={dataNode}
-        onUpdate={updateNode}
-        close={setModalAddCondition}
       />
       <FlowBuilderMenuModal
         open={modalAddMenu}
@@ -787,6 +814,14 @@ export const FlowBuilderConfig = () => {
         data={dataNode}
         onUpdate={updateNode}
         close={setModalAddTypebot}
+      />
+
+      <FlowBuilderAddQuestionModal
+        open={modalAddQuestion}
+        onSave={questionAdd}
+        data={dataNode}
+        onUpdate={updateNode}
+        close={setModalAddQuestion}
       />
 
       <MainHeader>

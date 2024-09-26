@@ -2651,10 +2651,7 @@ export const handleMessageIntegration = async (
     // await typebots(ticket, msg, wbot, queueIntegration);
     await typebotListener({ ticket, msg, wbot, typebot: queueIntegration });
   } else if (queueIntegration.type === "flowbuilder") {
-    if (
-      !isMenu &&
-      (!ticket.dataWebhook || ticket.dataWebhook["status"] === "stopped")
-    ) {
+    if (!isMenu) {
       const integrations = await ShowQueueIntegrationService(
         whatsapp.integrationId,
         companyId
@@ -3229,6 +3226,7 @@ const handleMessage = async (
 
     let isMenu = false;
     let isOpenai = false;
+    let isQuestion = false;
 
     if (flow) {
       isMenu =
@@ -3237,15 +3235,70 @@ const handleMessage = async (
       isOpenai =
         flow.flow["nodes"].find((node: any) => node.id === ticket.lastFlowId)
           ?.type === "openai";
+      isQuestion =
+        flow.flow["nodes"].find((node: any) => node.id === ticket.lastFlowId)
+          ?.type === "question";
     }
 
-    console.log({ isOpenai })
+    if (!isNil(flow) && isQuestion && !msg.key.fromMe) {
+      console.log(
+        "|============= QUESTION =============|",
+        JSON.stringify(flow, null, 4)
+      );
+      const body = getBodyMessage(msg);
+      if (body) {
+        const nodes: INodes[] = flow.flow["nodes"];
+        const nodeSelected = flow.flow["nodes"].find(
+          (node: any) => node.id === ticket.lastFlowId
+        );
+
+        const connections: IConnections[] = flow.flow["connections"];
+
+        const { message, answerKey } = nodeSelected.data.typebotIntegration;
+        const oldDataWebhook = ticket.dataWebhook;
+
+        const nodeIndex = nodes.findIndex(node => node.id === nodeSelected.id);
+
+        const lastFlowId = nodes[nodeIndex + 1].id;
+         await ticket.update({
+          lastFlowId: lastFlowId,
+          dataWebhook: {
+            variables: {
+              [answerKey]: body
+            }
+          }
+        });
+
+        await ticket.save();
+
+        const mountDataContact = {
+          number: contact.number,
+          name: contact.name,
+          email: contact.email
+        };
+
+        await ActionsWebhookService(
+          whatsapp.id,
+          parseInt(ticket.flowStopped),
+          ticket.companyId,
+          nodes,
+          connections,
+          lastFlowId,
+          null,
+          "",
+          "",
+          "",
+          ticket.id,
+          mountDataContact,
+          msg
+        );
+      }
+
+      return;
+    }
+
     
-    if (
-      isOpenai &&
-      !isNil(flow) &&
-      !ticket.queue
-    ) {
+    if (isOpenai && !isNil(flow) && !ticket.queue) {
       const nodeSelected = flow.flow["nodes"].find(
         (node: any) => node.id === ticket.lastFlowId
       );
@@ -3285,9 +3338,8 @@ const handleMessage = async (
         ticketTraking
       );
 
-      return
+      return;
     }
-
 
     //openai na conexao
     if (
@@ -3350,7 +3402,7 @@ const handleMessage = async (
       !isNil(whatsapp.integrationId) &&
       !ticket.useIntegration
     ) {
-      console.log("|============= FLOWBUILDERQUEUE =============|");
+
       const integrations = await ShowQueueIntegrationService(
         whatsapp.integrationId,
         companyId
