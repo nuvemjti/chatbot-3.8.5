@@ -100,26 +100,41 @@ const FlowBuilderAddQuestionModal = ({
   };
 
   const handleSavePrompt = (values) => {
-    let oldVariable = localStorage.getItem("variables")
-
-    const oldNameKey = data.data.typebotIntegration.answerKey
-    
-    if(oldVariable){
-      oldVariable = JSON.parse(oldVariable)
-    }else{
-      oldVariable = []
-    }
-
-    oldVariable = oldVariable.filter(item => item !== oldNameKey)
-    localStorage.setItem('variables', JSON.stringify([...oldVariable, values.answerKey]))    
+   
 
     if (open === "edit") {
+
+      let oldVariable = localStorage.getItem("variables")
+
+      const oldNameKey = data.data.typebotIntegration.answerKey
+      
+      if(oldVariable){
+        oldVariable = JSON.parse(oldVariable)
+      }else{
+        oldVariable = []
+      }
+  
+      oldVariable = oldVariable.filter(item => item !== oldNameKey)
+      localStorage.setItem('variables', JSON.stringify([...oldVariable, values.answerKey]))    
+
       handleClose();
       onUpdate({
         ...data,
         data: { typebotIntegration: { ...values, message } },
       });
     } else if (open === "create") {
+      
+      let oldVariable = localStorage.getItem("variables")
+
+      if(oldVariable){
+        oldVariable = JSON.parse(oldVariable)
+      }else{
+        oldVariable = []
+      }
+  
+      oldVariable = oldVariable.filter(item => item !== values.answerKey)
+      localStorage.setItem('variables', JSON.stringify([...oldVariable, values.answerKey]))    
+
       handleClose();
       onSave({
         typebotIntegration: {
