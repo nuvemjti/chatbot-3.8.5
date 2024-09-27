@@ -798,7 +798,11 @@ const FlowBuilderSingleBlockModal = ({
   };
 
   useEffect(() => {
-    setVariables(JSON.parse(localStorage.getItem("variables")));
+    const localVariables = localStorage.getItem("variables");
+    if (localVariables) {
+      setVariables(JSON.parse(localVariables));
+    }
+
     if (open === "edit") {
       setLabels({
         title: "Editar conteúdo",
@@ -1311,11 +1315,15 @@ const FlowBuilderSingleBlockModal = ({
             <Divider />
             <Box style={{ width: "100%", textAlign: "center" }}>
               <Typography>Variáveis</Typography>
-              {variables.map((item) => (
+              {variables && (
                 <>
-                  <Typography>{variableFormatter(item)}</Typography>
+                  {variables.map((item) => (
+                    <>
+                      <Typography>{variableFormatter(item)}</Typography>
+                    </>
+                  ))}
                 </>
-              ))}
+              )}
             </Box>
           </Stack>
 

@@ -101,16 +101,15 @@ const FlowBuilderAddQuestionModal = ({
 
   const handleSavePrompt = (values) => {
     let oldVariable = localStorage.getItem("variables")
-    console.log({ oldVariable })
 
     const oldNameKey = data.data.typebotIntegration.answerKey
+    
     if(oldVariable){
       oldVariable = JSON.parse(oldVariable)
     }else{
       oldVariable = []
     }
 
-    console.log("new valeukey", values.answerKey)
     oldVariable = oldVariable.filter(item => item !== oldNameKey)
     localStorage.setItem('variables', JSON.stringify([...oldVariable, values.answerKey]))    
 
