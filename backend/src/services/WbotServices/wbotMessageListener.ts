@@ -2026,6 +2026,7 @@ const verifyQueue = async (
 };
 
 export const verifyRating = (ticketTraking: TicketTraking) => {
+  console.log("2029", { verifyRating })
   if (
     ticketTraking &&
     ticketTraking.finishedAt === null &&
@@ -2045,6 +2046,8 @@ export const handleRating = async (
 ) => {
   const io = getIO();
   const companyId = ticket.companyId;
+
+  console.log("2050", { handleRating })
 
   // console.log("GETTING WHATSAPP HANDLE RATING", ticket.whatsappId, ticket.id)
   const { complationMessage } = await ShowWhatsAppService(
@@ -3112,6 +3115,20 @@ const handleMessage = async (
       }
     }
 
+    try {
+      if (!msg.key.fromMe) {
+        console.log("log... 3226");
+        console.log("log... 3227", { ticketTraking});
+        if (ticketTraking !== null && verifyRating(ticketTraking)) {
+          handleRating(parseFloat(bodyMessage), ticket, ticketTraking);
+          return;
+        }
+      }
+    } catch (e) {
+      Sentry.captureException(e);
+      console.log(e);
+    }
+    
     // Atualiza o ticket se a ultima mensagem foi enviada por mim, para que possa ser finalizado.
     try {
       console.log("log... 3258");
@@ -3217,6 +3234,8 @@ const handleMessage = async (
       Sentry.captureException(e);
       console.log(e);
     }
+
+   
 
     const flow = await FlowBuilderModel.findOne({
       where: {
@@ -3340,6 +3359,8 @@ const handleMessage = async (
 
       return;
     }
+
+
 
     //openai na conexao
     if (
