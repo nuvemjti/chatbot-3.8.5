@@ -728,11 +728,13 @@ export const FlowBuilderConfig = () => {
         break;
       case "ticket":
         setModalAddTicket("create");
+        break;
       case "typebot":
         setModalAddTypebot("create");
         break;
       case "openai":
         setModalAddOpenAI("create");
+        break;
       case "question":
         setModalAddQuestion("create");
       default:
