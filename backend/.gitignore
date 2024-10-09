@@ -3,4 +3,4 @@
 /.well-known
 /package-lock.json
 /public
-/.env
+.env
