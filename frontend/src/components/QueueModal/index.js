@@ -42,6 +42,7 @@ import CustomToolTip from "../ToolTips";
 import SchedulesForm from "../SchedulesForm";
 import useCompanySettings from "../../hooks/useSettings/companySettings";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import Autocomplete, { createFilterOptions } from "@material-ui/lab/Autocomplete";
 import useQueues from "../../hooks/useQueues";
 import UserStatusIcon from "../UserModal/statusIcon";
@@ -148,7 +149,8 @@ const QueueModal = ({ open, onClose, queueId, onEdit }) => {
   const [schedulesEnabled, setSchedulesEnabled] = useState(false);
   const [tab, setTab] = useState(0);
   const [file, setFile] = useState(null);
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
   const [searchParam, setSearchParam] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -181,6 +183,7 @@ const QueueModal = ({ open, onClose, queueId, onEdit }) => {
   useEffect(() => {
     async function fetchData() {
       const companyId = user.companyId;
+const socket = socketManager.GetSocket(companyId);
       const planConfigs = await getPlanCompany(undefined, companyId);
 
       setShowOpenAi(planConfigs.plan.useOpenAi);

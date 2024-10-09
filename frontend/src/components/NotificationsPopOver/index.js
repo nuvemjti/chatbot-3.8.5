@@ -20,6 +20,7 @@ import TicketListItem from "../TicketListItem";
 import useTickets from "../../hooks/useTickets";
 import alertSound from "../../assets/sound.mp3";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import { i18n } from "../../translate/i18n";
 import toastError from "../../errors/toastError";
 import useCompanySettings from "../../hooks/useSettings/companySettings";
@@ -53,8 +54,8 @@ const NotificationsPopOver = (volume) => {
 	const theme = useTheme();
 
 	const history = useHistory();
-	// const socketManager = useContext(SocketContext);
-	const { user, socket } = useContext(AuthContext);
+	const socketManager = useContext(SocketContext);
+	const { user } = useContext(AuthContext);
 	const { profile, queues } = user;
 
 	const ticketIdUrl = +history.location.pathname.split("/")[2];
@@ -141,7 +142,7 @@ const NotificationsPopOver = (volume) => {
 
 	useEffect(() => {
 		const companyId = user.companyId;
-		// const socket = socketManager.GetSocket();
+		const socket = socketManager.GetSocket(companyId);
 		if (user.id) {
 			const queueIds = queues.map((q) => q.id);
 
@@ -229,7 +230,7 @@ const NotificationsPopOver = (volume) => {
 				socket.off(`company-${companyId}-appMessage`, onCompanyAppMessageNotificationsPopover);
 			};
 		}
-	}, [user, profile, queues, showTicketWithoutQueue, socket, showNotificationPending, showGroupNotification]);
+	}, [user, profile, queues, showTicketWithoutQueue, socketManager, showNotificationPending, showGroupNotification]);
 
 	const handleNotifications = data => {
 		const { message, contact, ticket } = data;

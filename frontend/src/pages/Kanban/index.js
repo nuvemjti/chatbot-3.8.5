@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import api from "../../services/api";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import Board from 'react-trello';
 import { toast } from "react-toastify";
 import { i18n } from "../../translate/i18n";
@@ -64,7 +65,8 @@ const Kanban = () => {
   const classes = useStyles();
   const theme = useTheme(); // Obter o tema atual
   const history = useHistory();
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
   const [tags, setTags] = useState([]);
   const [tickets, setTickets] = useState([]);
   const [ticketNot, setTicketNot] = useState(0);
@@ -107,6 +109,7 @@ const Kanban = () => {
 
   useEffect(() => {
     const companyId = user.companyId;
+const socket = socketManager.GetSocket(companyId);
     const onAppMessage = (data) => {
       if (data.action === "create" || data.action === "update" || data.action === "delete") {
         fetchTickets();
@@ -119,7 +122,7 @@ const Kanban = () => {
       socket.off(`company-${companyId}-ticket`, onAppMessage);
       socket.off(`company-${companyId}-appMessage`, onAppMessage);
     };
-  }, [socket, startDate, endDate]);
+  }, [socketManager, startDate, endDate]);
 
   const handleSearchClick = () => {
     fetchTickets();

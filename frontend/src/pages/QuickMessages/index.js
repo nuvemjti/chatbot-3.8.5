@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useReducer, useContext, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useReducer,
+  useContext,
+  useCallback,
+} from "react";
 import { toast } from "react-toastify";
 
 import { makeStyles } from "@material-ui/core/styles";
@@ -13,7 +19,7 @@ import IconButton from "@material-ui/core/IconButton";
 import SearchIcon from "@material-ui/icons/Search";
 import TextField from "@material-ui/core/TextField";
 import InputAdornment from "@material-ui/core/InputAdornment";
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
 import EditIcon from "@material-ui/icons/Edit";
@@ -32,7 +38,7 @@ import { Grid } from "@material-ui/core";
 import { isArray } from "lodash";
 // import { SocketContext } from "../../context/Socket/SocketContext";
 import { AuthContext } from "../../context/Auth/AuthContext";
-
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_QUICKMESSAGES") {
@@ -61,7 +67,9 @@ const reducer = (state, action) => {
 
   if (action.type === "UPDATE_QUICKMESSAGES") {
     const quickemessage = action.payload;
-    const quickemessageIndex = state.findIndex((u) => u.id === quickemessage.id);
+    const quickemessageIndex = state.findIndex(
+      (u) => u.id === quickemessage.id
+    );
 
     if (quickemessageIndex !== -1) {
       state[quickemessageIndex] = quickemessage;
@@ -108,7 +116,8 @@ const Quickemessages = () => {
   const [searchParam, setSearchParam] = useState("");
   const [quickemessages, dispatch] = useReducer(reducer, []);
   //   const socketManager = useContext(SocketContext);
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+  const socketManager = useContext(SocketContext);
 
   const { profile } = user;
 
@@ -128,7 +137,7 @@ const Quickemessages = () => {
 
   useEffect(() => {
     const companyId = user.companyId;
-    // const socket = socketManager.GetSocket();
+    const socket = socketManager.GetSocket(companyId);
 
     const onQuickMessageEvent = (data) => {
       if (data.action === "update" || data.action === "create") {
@@ -143,11 +152,12 @@ const Quickemessages = () => {
     return () => {
       socket.off(`company-${companyId}-quickemessage`, onQuickMessageEvent);
     };
-  }, [socket]);
+  }, [socketManager]);
 
   const fetchQuickemessages = async () => {
     try {
       const companyId = user.companyId;
+      const socket = socketManager.GetSocket(companyId);
       //const searchParam = ({ companyId, userId: user.id });
       const { data } = await api.get("/quick-messages", {
         params: { searchParam, pageNumber },
@@ -195,7 +205,6 @@ const Quickemessages = () => {
     setPageNumber(1);
     fetchQuickemessages();
     dispatch({ type: "RESET" });
-
   };
 
   const loadMore = () => {
@@ -213,7 +222,12 @@ const Quickemessages = () => {
   return (
     <MainContainer>
       <ConfirmationModal
-        title={deletingQuickemessage && `${i18n.t("quickMessages.confirmationModal.deleteTitle")} ${deletingQuickemessage.shortcode}?`}
+        title={
+          deletingQuickemessage &&
+          `${i18n.t("quickMessages.confirmationModal.deleteTitle")} ${
+            deletingQuickemessage.shortcode
+          }?`
+        }
         open={confirmModalOpen}
         onClose={setConfirmModalOpen}
         onConfirm={() => handleDeleteQuickemessage(deletingQuickemessage.id)}
@@ -294,16 +308,19 @@ const Quickemessages = () => {
             <>
               {quickemessages.map((quickemessage) => (
                 <TableRow key={quickemessage.id}>
-                  <TableCell align="center">{quickemessage.shortcode}</TableCell>
+                  <TableCell align="center">
+                    {quickemessage.shortcode}
+                  </TableCell>
 
                   <TableCell align="center">
-                    {quickemessage.mediaName ?? i18n.t("quickMessages.noAttachment")}
+                    {quickemessage.mediaName ??
+                      i18n.t("quickMessages.noAttachment")}
                   </TableCell>
                   <TableCell align="center">
                     {quickemessage.geral === true ? (
-                      <CheckCircleIcon style={{ color: 'green' }} />
+                      <CheckCircleIcon style={{ color: "green" }} />
                     ) : (
-                      ''
+                      ""
                     )}
                   </TableCell>
                   <TableCell align="center">
@@ -313,7 +330,6 @@ const Quickemessages = () => {
                     >
                       <EditIcon />
                     </IconButton>
-
 
                     <IconButton
                       size="small"

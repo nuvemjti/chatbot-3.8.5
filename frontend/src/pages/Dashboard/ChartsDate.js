@@ -20,6 +20,7 @@ import { toast } from 'react-toastify';
 import './button.css';
 import { i18n } from '../../translate/i18n';
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import {  useTheme } from '@material-ui/core';
 
 ChartJS.register(

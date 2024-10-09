@@ -10,6 +10,7 @@ import { QueueSelectedProvider } from "../../context/QueuesSelected/QueuesSelect
 import { TicketsContext } from "../../context/Tickets/TicketsContext";
 import { i18n } from "../../translate/i18n";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import api from "../../services/api";
 import { CircularProgress } from "@material-ui/core";
 import { getBackendUrl } from "../../config";

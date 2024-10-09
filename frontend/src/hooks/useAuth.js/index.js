@@ -7,18 +7,19 @@ import { toast } from "react-toastify";
 import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
-import { socketConnection } from "../../services/socket";
+
 // import { useDate } from "../../hooks/useDate";
 import moment from "moment";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 const useAuth = () => {
   const history = useHistory();
   const [isAuth, setIsAuth] = useState(false);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState({});
-  const [socket, setSocket] = useState({})
- 
 
+  const socketManager = useContext(SocketContext);
+ 
   api.interceptors.request.use(
     (config) => {
       const token = localStorage.getItem("token");
@@ -76,29 +77,28 @@ const useAuth = () => {
   }, []);
 
   useEffect(() => {
-    if (Object.keys(user).length && user.id > 0) {
-      // console.log("Entrou useWhatsapp com user", Object.keys(user).length, Object.keys(socket).length ,user, socket)
-      let io;
-      if (!Object.keys(socket).length) {
-        io = socketConnection({ user });
-        setSocket(io)
-      } else {
-        io = socket
-      }
-      io.on(`company-${user.companyId}-user`, (data) => {
-        if (data.action === "update" && data.user.id === user.id) {
-          setUser(data.user);
-        }
-      });
-
-      return () => {
-        // console.log("desconectou o company user ", user.id)
-        io.off(`company-${user.companyId}-user`);
-        // io.disconnect();
-      };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (!socketManager){
+        return () => {};
     }
-  }, [user]);
+    const companyId = localStorage.getItem("companyId");
+    if (!companyId) {
+		return () => {};
+	}
+    const socket = socketManager.GetSocket(companyId);
+
+    const onCompanyUserUseAuth = (data) => {
+      if (data.action === "update" && data.user.id === user.id) {
+        setUser(data.user);
+      }
+    }
+
+    socket.on(`company-${companyId}-user`, onCompanyUserUseAuth);
+
+    return () => {
+      socket.off(`company-${companyId}-user`, onCompanyUserUseAuth);
+    };
+
+  }, [user, socketManager]);
 
   const handleLogin = async (userData) => {
     setLoading(true);
@@ -106,7 +106,7 @@ const useAuth = () => {
     try {
       const { data } = await api.post("/auth/login", userData);
       const {
-        user: { company },
+        user: { companyId, id, company },
       } = data;
 
       if (has(company, "companieSettings") && isArray(company.companieSettings[0])) {
@@ -149,8 +149,8 @@ const useAuth = () => {
       if (before === true) {
         localStorage.setItem("token", JSON.stringify(data.token));
         // localStorage.setItem("public-token", JSON.stringify(data.user.token));
-        // localStorage.setItem("companyId", companyId);
-        // localStorage.setItem("userId", id);
+        localStorage.setItem("companyId", companyId);
+        localStorage.setItem("userId", id);
         localStorage.setItem("companyDueDate", vencimento);
         api.defaults.headers.Authorization = `Bearer ${data.token}`;
         setUser(data.user);
@@ -220,7 +220,6 @@ Entre em contato com o Suporte para mais informações! `);
     handleLogin,
     handleLogout,
     getCurrentUserInfo,
-    socket
   };
 };
 

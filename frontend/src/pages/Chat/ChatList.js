@@ -11,6 +11,7 @@ import {
 
 import { useHistory, useParams } from "react-router-dom";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import { useDate } from "../../hooks/useDate";
 
 import DeleteIcon from "@material-ui/icons/Delete";
@@ -59,7 +60,8 @@ export default function ChatList({
 }) {
   const classes = useStyles();
   const history = useHistory();
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
   const { datetimeToClient } = useDate();
 
   const [confirmationModal, setConfirmModalOpen] = useState(false);

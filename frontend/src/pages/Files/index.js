@@ -36,6 +36,7 @@ import ConfirmationModal from "../../components/ConfirmationModal";
 import toastError from "../../errors/toastError";
 // import { SocketContext } from "../../context/Socket/SocketContext";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import ForbiddenPage from "../../components/ForbiddenPage";
 
 const reducer = (state, action) => {
@@ -95,7 +96,8 @@ const FileLists = () => {
     const classes = useStyles();
 
     //   const socketManager = useContext(SocketContext);
-    const { user, socket } = useContext(AuthContext);
+    const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
 
 
     const [loading, setLoading] = useState(false);
@@ -135,7 +137,8 @@ const FileLists = () => {
     }, [searchParam, pageNumber, fetchFileLists]);
 
     useEffect(() => {
-        // const socket = socketManager.GetSocket(user.companyId, user.id);
+        const companyId = user.companyId;
+        const socket = socketManager.GetSocket(companyId);
 
         const onFileEvent = (data) => {
             if (data.action === "update" || data.action === "create") {
@@ -151,7 +154,7 @@ const FileLists = () => {
         return () => {
             socket.off(`company-${user.companyId}-file`, onFileEvent);
         };
-    }, [socket]);
+    }, [socketManager]);
 
     const handleOpenFileListModal = () => {
         setSelectedFileList(null);

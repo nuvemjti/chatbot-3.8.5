@@ -15,6 +15,7 @@ import api from "../../services/api";
 import TableRowSkeleton from "../../components/TableRowSkeleton";
 import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import moment from "moment";
 import ForbiddenPage from "../../components/ForbiddenPage";
 

@@ -40,6 +40,7 @@ import { useDate } from "../../hooks/useDate";
 import ForbiddenPage from "../../components/ForbiddenPage";
 import usePlans from "../../hooks/usePlans";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_CAMPAIGNS") {
@@ -112,7 +113,8 @@ const Campaigns = () => {
   const [searchParam, setSearchParam] = useState("");
   const [campaigns, dispatch] = useReducer(reducer, []);
   //   const socketManager = useContext(SocketContext);
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
 
 
   const { datetimeToClient } = useDate();
@@ -121,6 +123,7 @@ const Campaigns = () => {
   useEffect(() => {
     async function fetchData() {
       const companyId = user.companyId;
+const socket = socketManager.GetSocket(companyId);
       const planConfigs = await getPlanCompany(undefined, companyId);
       if (!planConfigs.plan.useCampaigns) {
         toast.error("Esta empresa não possui permissão para acessar essa página! Estamos lhe redirecionando.");
@@ -148,8 +151,8 @@ const Campaigns = () => {
   }, [searchParam, pageNumber]);
 
   useEffect(() => {
-    const companyId = user.companyId;
-    // const socket = socketManager.GetSocket();
+const companyId = user.companyId;
+      const socket = socketManager.GetSocket(companyId);
 
     const onCompanyCampaign = (data) => {
       if (data.action === "update" || data.action === "create") {

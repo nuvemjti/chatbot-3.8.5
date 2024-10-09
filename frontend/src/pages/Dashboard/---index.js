@@ -29,6 +29,7 @@ import TableAttendantsStatus from "../../components/Dashboard/TableAttendantsSta
 import { isArray } from "lodash";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 import useDashboard from "../../hooks/useDashboard";
 import useContacts from "../../hooks/useContacts";

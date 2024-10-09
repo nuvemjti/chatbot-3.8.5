@@ -14,6 +14,7 @@ import moment from "moment";
 import { useDate } from "../../hooks/useDate";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 const useStyles = makeStyles((theme) => ({
   mainPaper: {
@@ -26,7 +27,8 @@ const useStyles = makeStyles((theme) => ({
 
 const Contacts = () => {
   const classes = useStyles();
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
 
   const [loading,] = useState(false);
   const [, setPageNumber] = useState(1);

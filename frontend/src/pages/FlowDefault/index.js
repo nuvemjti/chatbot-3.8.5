@@ -16,8 +16,8 @@ import Title from "../../components/Title";
 import MainContainer from "../../components/MainContainer";
 import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
-import NewTicketModal from "../../components/NewTicketModal";
 import { SocketContext } from "../../context/Socket/SocketContext";
+import NewTicketModal from "../../components/NewTicketModal";
 
 import {
   AddCircle,

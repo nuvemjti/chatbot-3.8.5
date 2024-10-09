@@ -18,6 +18,7 @@ import { toast } from "react-toastify";
 
 import useCompanies from "../../hooks/useCompanies";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 import OnlyForSuperUser from "../../components/OnlyForSuperUser";
 import useCompanySettings from "../../hooks/useSettings/companySettings";
@@ -75,13 +76,15 @@ const SettingsCustom = () => {
   //novo hook
   const { getAll: getAllSettings } = useCompanySettings();
   const { getAll: getAllSettingsOld } = useSettings();
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
 
   useEffect(() => {
     async function findData() {
       setLoading(true);
       try {
         const companyId = user.companyId;
+const socket = socketManager.GetSocket(companyId);
         const company = await find(companyId);
 
         const settingList = await getAllSettings(companyId);

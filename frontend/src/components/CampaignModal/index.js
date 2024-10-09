@@ -35,6 +35,7 @@ import {
   Tabs,
 } from "@material-ui/core";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import ConfirmationModal from "../ConfirmationModal";
 import UserStatusIcon from "../UserModal/statusIcon";
 import Autocomplete, { createFilterOptions } from "@material-ui/lab/Autocomplete";
@@ -88,7 +89,8 @@ const CampaignModal = ({
 }) => {
   const classes = useStyles();
   const isMounted = useRef(true);
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
   const { companyId } = user;
 
   const initialState = {

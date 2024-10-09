@@ -22,6 +22,7 @@ import ListAltIcon from "@material-ui/icons/ListAlt";
 import { useDate } from "../../hooks/useDate";
 import usePlans from "../../hooks/usePlans";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 // import { SocketContext } from "../../context/Socket/SocketContext";
 import { i18n } from "../../translate/i18n";
@@ -58,7 +59,8 @@ const CampaignReport = () => {
   const [loading, setLoading] = useState(false);
   const mounted = useRef(true);
   //   const socketManager = useContext(SocketContext);
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
 
 
   const { datetimeToClient } = useDate();
@@ -67,6 +69,7 @@ const CampaignReport = () => {
   useEffect(() => {
     async function fetchData() {
       const companyId = user.companyId;
+const socket = socketManager.GetSocket(companyId);
       const planConfigs = await getPlanCompany(undefined, companyId);
       if (!planConfigs.plan.useCampaigns) {
         toast.error("Esta empresa não possui permissão para acessar essa página! Estamos lhe redirecionando.");
@@ -120,8 +123,9 @@ const CampaignReport = () => {
   }, [delivered, validContacts]);
 
   useEffect(() => {
-    const companyId = user.companyId;
-    // const socket = socketManager.GetSocket();
+
+      const companyId = user.companyId;
+      const socket = socketManager.GetSocket(companyId);
 
     const onCampaignEvent = (data) => {
 

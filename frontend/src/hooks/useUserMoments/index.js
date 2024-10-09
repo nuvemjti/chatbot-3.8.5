@@ -4,13 +4,15 @@ import { useState, useEffect, useContext } from "react";
 import { toast } from "react-toastify";
 import { i18n } from "../../translate/i18n";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 // import { SocketContext } from "../../context/Socket/SocketContext";
 
 const useUserMoments = () => {
   const [users, setUsers] = useState([]);
   const [update, setUpdate] = useState(true);
   const [isUpdate, setIsUpdate] = useState([]);
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
 
 
   useEffect(() => {
@@ -35,6 +37,7 @@ const useUserMoments = () => {
   useEffect(() => {
     if (user.id && socket) { // Verifica se user.id e socket estão definidos
       const companyId = user.companyId;
+const socket = socketManager.GetSocket(companyId);
       
       const onTicketEvent = (data) => {
         if (isUpdate !== data) {

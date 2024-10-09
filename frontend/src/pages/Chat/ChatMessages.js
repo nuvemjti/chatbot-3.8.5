@@ -12,6 +12,7 @@ import {
 import SendIcon from "@material-ui/icons/Send";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import { useDate } from "../../hooks/useDate";
 import api from "../../services/api";
 
@@ -78,7 +79,8 @@ export default function ChatMessages({
   loading,
 }) {
   const classes = useStyles();
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
   const { datetimeToClient } = useDate();
   const baseRef = useRef();
 

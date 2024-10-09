@@ -22,6 +22,7 @@ import { i18n } from "../../translate/i18n";
 import Switch from "@material-ui/core/Switch";
 import { FormControlLabel, FormControl } from "@material-ui/core";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import Autocomplete, { createFilterOptions } from "@material-ui/lab/Autocomplete";
 import useQueues from "../../hooks/useQueues";
 import UserStatusIcon from "../UserModal/statusIcon";
@@ -87,7 +88,8 @@ export default function VerticalLinearStepper(props) {
   const [users, setUsers] = useState([]);
   const [integrations, setIntegrations] = useState([]);
   const [file, setFile] = useState([]);
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
   const [searchParam, setSearchParam] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedQueue, setSelectedQueue] = useState("");

@@ -27,6 +27,7 @@ import { toast } from "react-toastify";
 import ConfirmationModal from "../../components/ConfirmationModal";
 // import { SocketContext } from "../../context/Socket/SocketContext";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import ForbiddenPage from "../../components/ForbiddenPage";
 
 const useStyles = makeStyles((theme) => ({
@@ -96,7 +97,8 @@ const Queues = () => {
   const [selectedQueue, setSelectedQueue] = useState(null);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   //   const socketManager = useContext(SocketContext);
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
   const companyId = user.companyId;
 
 
@@ -116,6 +118,8 @@ const Queues = () => {
   }, []);
 
   useEffect(() => {
+    const companyId = user.companyId;
+    const socket = socketManager.GetSocket(companyId);
 
     const onQueueEvent = (data) => {
       if (data.action === "update" || data.action === "create") {
@@ -131,7 +135,7 @@ const Queues = () => {
     return () => {
       socket.off(`company-${companyId}-queue`, onQueueEvent);
     };
-  }, [socket, companyId]);
+  }, [socketManager]);
 
   const handleOpenQueueModal = () => {
     setQueueModalOpen(true);

@@ -29,6 +29,7 @@ import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -94,7 +95,8 @@ const PurpleCheckbox = withStyles({
 
 const MessageModal = ({ open, onClose, messageId, reload }) => {
   const classes = useStyles();
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
 
   const initialState = {
     nome: "",

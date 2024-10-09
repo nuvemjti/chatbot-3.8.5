@@ -45,6 +45,7 @@ import MainHeaderButtonsWrapper from "../MainHeaderButtonsWrapper";
 import Title from "../Title";
 import TableRowSkeleton from "../TableRowSkeleton";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import useCompanies from "../../hooks/useCompanies";
 import api from "../../services/api";
 import WhatsAppModalAdmin from "../WhatsAppModalAdmin";
@@ -122,7 +123,8 @@ const WhatsAppModalCompany = ({
   //console.log(filteredWhatsapps,"teste")
   //console.log(companyInfos,"testeeeee")
   const classes = useStyles();
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
   const { list } = useCompanies();
   const [loadingComp, setLoadingComp] = useState(false);
   const { whatsApps, loading } = useContext(WhatsAppsContext);

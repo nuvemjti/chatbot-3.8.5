@@ -12,6 +12,7 @@ import TransferTicketModalCustom from "../TransferTicketModalCustom";
 import toastError from "../../errors/toastError";
 import { Can } from "../Can";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import ScheduleModal from "../ScheduleModal";
 
 const TicketOptionsMenu = ({ ticket, menuOpen, handleClose, anchorEl }) => {

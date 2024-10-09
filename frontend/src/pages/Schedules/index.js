@@ -19,6 +19,7 @@ import toastError from "../../errors/toastError";
 import moment from "moment";
 // import { SocketContext } from "../../context/Socket/SocketContext";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import usePlans from "../../hooks/usePlans";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import "moment/locale/pt-br";
@@ -142,7 +143,8 @@ const Schedules = () => {
   const history = useHistory();
 
   //   const socketManager = useContext(SocketContext);
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
 
 
   const [loading, setLoading] = useState(false);
@@ -161,6 +163,7 @@ const Schedules = () => {
   useEffect(() => {
     async function fetchData() {
       const companyId = user.companyId;
+const socket = socketManager.GetSocket(companyId);
       const planConfigs = await getPlanCompany(undefined, companyId);
       if (!planConfigs.plan.useSchedules) {
         toast.error("Esta empresa não possui permissão para acessar essa página! Estamos lhe redirecionando.");
@@ -213,7 +216,8 @@ const Schedules = () => {
 
   useEffect(() => {
     // handleOpenScheduleModalFromContactId();
-    // const socket = socketManager.GetSocket(user.companyId, user.id);
+    const companyId = user.companyId;
+    const socket = socketManager.GetSocket(companyId);
 
 
     const onCompanySchedule = (data) => {
@@ -231,7 +235,7 @@ const Schedules = () => {
     return () => {
       socket.off(`company${user.companyId}-schedule`, onCompanySchedule)
     };
-  }, [socket]);
+  }, [socketManager]);
 
   const cleanContact = () => {
     setContactId("");

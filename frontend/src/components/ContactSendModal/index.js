@@ -17,6 +17,7 @@ import ButtonWithSpinner from "../ButtonWithSpinner";
 import ContactModal from "../ContactModal";
 import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import { Grid, ListItemText, MenuItem, Select } from "@material-ui/core";
 import { toast } from "react-toastify";
 import { Facebook, Instagram, WhatsApp } from "@material-ui/icons";
@@ -47,7 +48,8 @@ const ContactSendModal = ({ modalOpen, onClose }) => {
   const [newContact, setNewContact] = useState({});
   
   const [contactModalOpen, setContactModalOpen] = useState(false);
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
   const { companyId, whatsappId } = user;
 
   useEffect(() => {

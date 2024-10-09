@@ -9,6 +9,7 @@ import { Grid, Paper } from "@material-ui/core";
 import Title from "../../components/Title";
 import ForbiddenPage from "../../components/ForbiddenPage";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 const useStyles = makeStyles((theme) => ({
   container: {

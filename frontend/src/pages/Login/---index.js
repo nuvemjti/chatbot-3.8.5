@@ -9,6 +9,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
 import { i18n } from "../../translate/i18n";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import ColorModeContext from "../../layout/themeContext";
 import useSettings from "../../hooks/useSettings";
 import IconButton from "@material-ui/core/IconButton";

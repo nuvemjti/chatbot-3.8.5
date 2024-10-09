@@ -8,6 +8,7 @@ import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 import { Button, Divider, useTheme, } from "@material-ui/core";
 import { isNil } from 'lodash';

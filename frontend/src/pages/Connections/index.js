@@ -55,6 +55,7 @@ import { WhatsAppsContext } from "../../context/WhatsApp/WhatsAppsContext";
 import toastError from "../../errors/toastError";
 import formatSerializedId from '../../utils/formatSerializedId';
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import usePlans from "../../hooks/usePlans";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import ForbiddenPage from "../../components/ForbiddenPage";
@@ -170,7 +171,8 @@ const Connections = () => {
   const [planConfig, setPlanConfig] = useState(false);
 
   //   const socketManager = useContext(SocketContext);
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
 
   const companyId = user.companyId;
 
@@ -223,7 +225,8 @@ const Connections = () => {
   };
 
   useEffect(() => {
-    // const socket = socketManager.GetSocket();
+      const companyId = user.companyId;
+      const socket = socketManager.GetSocket(companyId);
     socket.on(`importMessages-${user.companyId}`, (data) => {
       if (data.action === "refresh") {
         setStatusImport([]);

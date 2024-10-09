@@ -12,6 +12,7 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import usePlans from "../../hooks/usePlans";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 const useStyles = makeStyles((theme) => ({
   mainPaper: {
@@ -40,13 +41,15 @@ const MessagesAPI = () => {
   const [formMessageTextData,] = useState({ token: '', number: '', body: '', userId: '', queueId: '' })
   const [formMessageMediaData,] = useState({ token: '', number: '', medias: '', body:'', userId: '', queueId: '' })
   const [file, setFile] = useState({})
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
 
   const { getPlanCompany } = usePlans();
 
   useEffect(() => {
     async function fetchData() {
       const companyId = user.companyId;
+const socket = socketManager.GetSocket(companyId);
       const planConfigs = await getPlanCompany(undefined, companyId);
       if (!planConfigs.plan.useExternalApi) {
         toast.error("Esta empresa não possui permissão para acessar essa página! Estamos lhe redirecionando.");

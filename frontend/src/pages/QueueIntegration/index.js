@@ -43,6 +43,7 @@ import api from "../../services/api";
 import { i18n } from "../../translate/i18n";
 import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import usePlans from "../../hooks/usePlans";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import ForbiddenPage from "../../components/ForbiddenPage";
@@ -119,7 +120,8 @@ const QueueIntegration = () => {
   const [searchParam, setSearchParam] = useState("");
   const [queueIntegration, dispatch] = useReducer(reducer, []);
   //   const socketManager = useContext(SocketContext);
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
 
   const { getPlanCompany } = usePlans();
   const companyId = user.companyId;
@@ -165,7 +167,8 @@ const QueueIntegration = () => {
   }, [searchParam, pageNumber]);
 
   useEffect(() => {
-    // const socket = socketManager.GetSocket();
+      const companyId = user.companyId;
+      const socket = socketManager.GetSocket(companyId);
 
     const onQueueEvent = (data) => {
       if (data.action === "update" || data.action === "create") {
@@ -181,7 +184,7 @@ const QueueIntegration = () => {
     return () => {
       socket.off(`company-${companyId}-queueIntegration`, onQueueEvent);
     };
-  }, []);
+  }, [socketManager]);
 
   const handleOpenUserModal = () => {
     setSelectedIntegration(null);

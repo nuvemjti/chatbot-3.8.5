@@ -36,6 +36,7 @@ import {
   Typography
 } from "@material-ui/core";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import ConfirmationModal from "../ConfirmationModal";
 import { Autocomplete, Checkbox, Chip, Stack } from "@mui/material";
 

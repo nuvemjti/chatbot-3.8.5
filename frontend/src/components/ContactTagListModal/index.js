@@ -17,6 +17,7 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import CloseIcon from "@material-ui/icons/Close";
 import api from "../../services/api";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 const useStyles = makeStyles((theme) => ({
   modal: {
@@ -46,14 +47,16 @@ const handleRemoveContactTag = async (contactId, tagId) => {
 const ContactTagListModal = ({ open, onClose, tag }) => {
   const classes = useStyles();
   const [tagList, setTagList] = useState(tag.contacts);
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
 
   useEffect(() => {
     console.log("tagList", tagList)
   }, [tagList])
 
   useEffect(() => {
-    // const socket = socketManager.GetSocket(user.companyId, user.id);
+    const companyId = user.companyId;
+    const socket = socketManager.GetSocket(companyId);
 
     const onCompanyTags = (data) => {
       if (data.action === "update" || data.action === "create") {

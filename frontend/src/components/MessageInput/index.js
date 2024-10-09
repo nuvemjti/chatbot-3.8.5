@@ -46,6 +46,7 @@ import MicRecorder from "mic-recorder-to-mp3";
 import clsx from "clsx";
 import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessageContext";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import { i18n } from "../../translate/i18n";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
@@ -368,6 +369,7 @@ const MessageInput = ({ ticketId, ticketStatus, droppedFiles, contactId, ticketC
   const [privateMessageInputVisible, setPrivateMessageInputVisible] = useState(false);
   const [senVcardModalOpen, setSenVcardModalOpen] = useState(false);
   const [showModalMedias, setShowModalMedias] = useState(false);
+  const socketManager = useContext(SocketContext);
 
   const { list: listQuickMessages } = useQuickMessages();
 
@@ -698,6 +700,7 @@ const MessageInput = ({ ticketId, ticketStatus, droppedFiles, contactId, ticketC
   useEffect(() => {
     async function fetchData() {
       const companyId = user.companyId;
+const socket = socketManager.GetSocket(companyId);
       const messages = await listQuickMessages({ companyId, userId: user.id });
       const options = messages.map((m) => {
         let truncatedMessage = m.message;

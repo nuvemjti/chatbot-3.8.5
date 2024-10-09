@@ -6,6 +6,7 @@ import AnnouncementIcon from "@material-ui/icons/Announcement";
 
 import { i18n } from "../../translate/i18n";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 import {
   Avatar,
@@ -76,7 +77,10 @@ function AnnouncementDialog({ announcement, open, handleClose }) {
             />
           </div>
         )}
-        <DialogContentText id="alert-dialog-description" style={{ whiteSpace: "pre-line" }}>
+        <DialogContentText
+          id="alert-dialog-description"
+          style={{ whiteSpace: "pre-line" }}
+        >
           {announcement.text}
         </DialogContentText>
       </DialogContent>
@@ -149,9 +153,9 @@ export default function AnnouncementsPopover() {
   const [invisible, setInvisible] = useState(false);
   const [announcement, setAnnouncement] = useState({});
   const [showAnnouncementDialog, setShowAnnouncementDialog] = useState(false);
-//   const socketManager = useContext(SocketContext);
-  const { user, socket } = useContext(AuthContext);
-
+  //   const socketManager = useContext(SocketContext);
+  const { user } = useContext(AuthContext);
+  const socketManager = useContext(SocketContext);
 
   useEffect(() => {
     dispatch({ type: "RESET" });
@@ -170,7 +174,7 @@ export default function AnnouncementsPopover() {
   useEffect(() => {
     if (user.companyId) {
       const companyId = user.companyId;
-//    const socket = socketManager.GetSocket();
+      const socket = socketManager.GetSocket(companyId);
 
       const onCompanyAnnouncement = (data) => {
         if (data.action === "update" || data.action === "create") {
@@ -234,7 +238,6 @@ export default function AnnouncementsPopover() {
       return "4px solid grey";
     }
   };
-
 
   const handleShowAnnouncementDialog = (record) => {
     setAnnouncement(record);
@@ -304,9 +307,7 @@ export default function AnnouncementsPopover() {
                 >
                   {item.mediaPath && (
                     <ListItemAvatar>
-                      <Avatar
-                        src={item.mediaPath}
-                      />
+                      <Avatar src={item.mediaPath} />
                     </ListItemAvatar>
                   )}
                   <ListItemText

@@ -6,6 +6,7 @@ import api from "../../services/api";
 import { Can } from "../Can";
 import AttachFileIcon from "@material-ui/icons/AttachFile";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import * as XLSX from "xlsx";
 const useStyles = makeStyles((theme) => ({
   multFieldLine: {
@@ -41,7 +42,8 @@ const useStyles = makeStyles((theme) => ({
 
 const ContactImportWpModal = ({ isOpen, handleClose, selectedTags, hideNum, userProfile }) => {
   const classes = useStyles();
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
 
   const initialContact = { name: "", number: "", error: "" }
 

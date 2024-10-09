@@ -32,8 +32,8 @@ import { Grid } from "@material-ui/core";
 import { isArray } from "lodash";
 // import { SocketContext } from "../../context/Socket/SocketContext";
 
-
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_ANNOUNCEMENTS") {
@@ -97,9 +97,9 @@ const Announcements = () => {
   const classes = useStyles();
   const history = useHistory();
 
-//   const socketManager = useContext(SocketContext);
-  const { user, socket } = useContext(AuthContext);
-
+  //   const socketManager = useContext(SocketContext);
+  const { user } = useContext(AuthContext);
+  const socketManager = useContext(SocketContext);
 
   const [loading, setLoading] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
@@ -111,13 +111,15 @@ const Announcements = () => {
   const [searchParam, setSearchParam] = useState("");
   const [announcements, dispatch] = useReducer(reducer, []);
 
-  // trava para nao acessar pagina que não pode  
+  // trava para nao acessar pagina que não pode
   useEffect(() => {
     async function fetchData() {
       if (!user.super) {
-        toast.error("Esta empresa não possui permissão para acessar essa página! Estamos lhe redirecionando.");
+        toast.error(
+          "Esta empresa não possui permissão para acessar essa página! Estamos lhe redirecionando."
+        );
         setTimeout(() => {
-          history.push(`/`)
+          history.push(`/`);
         }, 1000);
       }
     }
@@ -141,7 +143,7 @@ const Announcements = () => {
 
   useEffect(() => {
     if (user.companyId) {
-//    const socket = socketManager.GetSocket();
+      const socket = socketManager.GetSocket(user.companyId);
 
       const onCompanyAnnouncement = (data) => {
         if (data.action === "update" || data.action === "create") {
@@ -150,14 +152,14 @@ const Announcements = () => {
         if (data.action === "delete") {
           dispatch({ type: "DELETE_ANNOUNCEMENT", payload: +data.id });
         }
-      }
+      };
 
       socket.on(`company-announcement`, onCompanyAnnouncement);
       return () => {
         socket.off(`company-announcement`, onCompanyAnnouncement);
-      }
+      };
     }
-  }, [user]);
+  }, [socketManager]);
 
   const fetchAnnouncements = async () => {
     try {
@@ -232,11 +234,12 @@ const Announcements = () => {
   };
 
   return (
-    <MainContainer >
+    <MainContainer>
       <ConfirmationModal
         title={
           deletingAnnouncement &&
-          `${i18n.t("announcements.confirmationModal.deleteTitle")} ${deletingAnnouncement.name
+          `${i18n.t("announcements.confirmationModal.deleteTitle")} ${
+            deletingAnnouncement.name
           }?`
         }
         open={confirmModalOpen}
@@ -258,7 +261,9 @@ const Announcements = () => {
       <MainHeader>
         <Grid style={{ width: "99.6%" }} container>
           <Grid xs={12} sm={8} item>
-            <Title>{i18n.t("announcements.title")} ({announcements.length})</Title>
+            <Title>
+              {i18n.t("announcements.title")} ({announcements.length})
+            </Title>
           </Grid>
           <Grid xs={12} sm={4} item>
             <Grid spacing={2} container>
@@ -326,10 +331,13 @@ const Announcements = () => {
                     {translatePriority(announcement.priority)}
                   </TableCell>
                   <TableCell align="center">
-                    {announcement.mediaName ?? i18n.t("quickMessages.noAttachment")}
+                    {announcement.mediaName ??
+                      i18n.t("quickMessages.noAttachment")}
                   </TableCell>
                   <TableCell align="center">
-                    {announcement.status ? i18n.t("announcements.active") : i18n.t("announcements.inactive")}
+                    {announcement.status
+                      ? i18n.t("announcements.active")
+                      : i18n.t("announcements.inactive")}
                   </TableCell>
                   <TableCell align="center">
                     <IconButton
@@ -356,8 +364,8 @@ const Announcements = () => {
           </TableBody>
         </Table>
       </Paper>
-    </MainContainer >
-  )
+    </MainContainer>
+  );
 };
 
 export default Announcements;

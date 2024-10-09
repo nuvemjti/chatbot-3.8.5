@@ -38,6 +38,7 @@ import Title from "../../components/Title";
 import MainContainer from "../../components/MainContainer";
 import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import { Can } from "../../components/Can";
 import useContactLists from "../../hooks/useContactLists";
 import { Grid } from "@material-ui/core";
@@ -104,7 +105,8 @@ const ContactListItems = () => {
   const classes = useStyles();
 
   //   const socketManager = useContext(SocketContext);
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
 
   const { contactListId } = useParams();
   const history = useHistory();
@@ -157,8 +159,8 @@ const ContactListItems = () => {
   }, [searchParam, pageNumber, contactListId]);
 
   useEffect(() => {
-    const companyId = user.companyId;
-    // const socket = socketManager.GetSocket();
+const companyId = user.companyId;
+      const socket = socketManager.GetSocket(companyId);
 
     const onCompanyContactLists = (data) => {
       if (data.action === "update" || data.action === "create") {

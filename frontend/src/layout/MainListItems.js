@@ -60,6 +60,7 @@ import usePlans from "../hooks/usePlans";
 import useVersion from "../hooks/useVersion";
 import { i18n } from "../translate/i18n";
 import { Campaign, ShapeLine, Webhook } from "@mui/icons-material";
+import { SocketContext } from "../context/Socket/SocketContext";
 
 const useStyles = makeStyles((theme) => ({
   listItem: {
@@ -88,7 +89,10 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: "50%",
     height: 36,
     width: 36,
-    backgroundColor: theme.mode === "light" ? "rgba(120,120,120,0.1)" : "rgba(120,120,120,0.5)",
+    backgroundColor:
+      theme.mode === "light"
+        ? "rgba(120,120,120,0.1)"
+        : "rgba(120,120,120,0.5)",
     color: theme.mode === "light" ? "#666" : "#FFF",
     // color: theme.mode === "light" ? theme.palette.primary.main : "#FFF",
     "&:hover, &.active": {
@@ -109,7 +113,10 @@ function ListItemLink(props) {
   const isActive = activeMenu === to || location.pathname === to;
 
   const renderLink = React.useMemo(
-    () => React.forwardRef((itemProps, ref) => <RouterLink to={to} ref={ref} {...itemProps} />),
+    () =>
+      React.forwardRef((itemProps, ref) => (
+        <RouterLink to={to} ref={ref} {...itemProps} />
+      )),
     [to]
   );
 
@@ -129,15 +136,38 @@ function ListItemLink(props) {
           {icon ? (
             <ListItemIcon>
               {showBadge ? (
-                <Badge badgeContent="!" color="error" overlap="circular" className={classes.badge}>
-                  <Avatar className={`${classes.iconHoverActive} ${isActive ? "active" : ""}`}>{icon}</Avatar>
+                <Badge
+                  badgeContent="!"
+                  color="error"
+                  overlap="circular"
+                  className={classes.badge}
+                >
+                  <Avatar
+                    className={`${classes.iconHoverActive} ${
+                      isActive ? "active" : ""
+                    }`}
+                  >
+                    {icon}
+                  </Avatar>
                 </Badge>
               ) : (
-                <Avatar className={`${classes.iconHoverActive} ${isActive ? "active" : ""}`}>{icon}</Avatar>
+                <Avatar
+                  className={`${classes.iconHoverActive} ${
+                    isActive ? "active" : ""
+                  }`}
+                >
+                  {icon}
+                </Avatar>
               )}
             </ListItemIcon>
           ) : null}
-          <ListItemText primary={<Typography className={classes.listItemText}>{primary}</Typography>} />
+          <ListItemText
+            primary={
+              <Typography className={classes.listItemText}>
+                {primary}
+              </Typography>
+            }
+          />
         </ListItem>
       </li>
     </ConditionalTooltip>
@@ -204,7 +234,8 @@ const MainListItems = ({ collapsed, drawerClose }) => {
   const theme = useTheme();
   const classes = useStyles();
   const { whatsApps } = useContext(WhatsAppsContext);
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+  const socketManager = useContext(SocketContext);
   const { setActiveMenu } = useActiveMenu();
   const location = useLocation();
 
@@ -229,12 +260,12 @@ const MainListItems = ({ collapsed, drawerClose }) => {
   const [version, setVersion] = useState(false);
   const [managementHover, setManagementHover] = useState(false);
   const [campaignHover, setCampaignHover] = useState(false);
-  const [flowHover, setFlowHover] = useState(false)
-  const { list } = useHelps();  // INSERIR
+  const [flowHover, setFlowHover] = useState(false);
+  const { list } = useHelps(); // INSERIR
   const [hasHelps, setHasHelps] = useState(false);
 
-
-  useEffect(() => {   // INSERIR ESSE EFFECT INTEIRO
+  useEffect(() => {
+    // INSERIR ESSE EFFECT INTEIRO
     async function checkHelps() {
       const helps = await list();
       setHasHelps(helps.length > 0);
@@ -243,16 +274,18 @@ const MainListItems = ({ collapsed, drawerClose }) => {
   }, []);
 
   const isManagementActive =
-    location.pathname === "/" || location.pathname.startsWith("/reports") || location.pathname.startsWith("/moments");
+    location.pathname === "/" ||
+    location.pathname.startsWith("/reports") ||
+    location.pathname.startsWith("/moments");
 
   const isCampaignRouteActive =
     location.pathname === "/campaigns" ||
     location.pathname.startsWith("/contact-lists") ||
     location.pathname.startsWith("/campaigns-config");
 
-  const isFlowbuilderRouteActive = 
-    location.pathname.startsWith("/phrase-lists")
-    location.pathname.startsWith("/flowbuilders")
+  const isFlowbuilderRouteActive =
+    location.pathname.startsWith("/phrase-lists");
+  location.pathname.startsWith("/flowbuilders");
 
   useEffect(() => {
     if (location.pathname.startsWith("/tickets")) {
@@ -308,8 +341,7 @@ const MainListItems = ({ collapsed, drawerClose }) => {
   useEffect(() => {
     if (user.id) {
       const companyId = user.companyId;
-      //    const socket = socketManager.GetSocket();
-      // console.log('socket nListItems')
+      const socket = socketManager.GetSocket(companyId);
       const onCompanyChatMainListItems = (data) => {
         if (data.action === "new-message") {
           dispatch({ type: "CHANGE_CHAT", payload: data });
@@ -324,7 +356,7 @@ const MainListItems = ({ collapsed, drawerClose }) => {
         socket.off(`company-${companyId}-chat`, onCompanyChatMainListItems);
       };
     }
-  }, [socket]);
+  }, [socketManager]);
 
   useEffect(() => {
     let unreadsCount = 0;
@@ -387,14 +419,18 @@ const MainListItems = ({ collapsed, drawerClose }) => {
     <div onClick={drawerClose}>
       <Can
         role={
-          (user.profile === "user" && user.showDashboard === "enabled") || user.allowRealTime === "enabled"
+          (user.profile === "user" && user.showDashboard === "enabled") ||
+          user.allowRealTime === "enabled"
             ? "admin"
             : user.profile
         }
         perform={"drawer-admin-items:view"}
         yes={() => (
           <>
-            <Tooltip title={collapsed ? i18n.t("mainDrawer.listItems.management") : ""} placement="right">
+            <Tooltip
+              title={collapsed ? i18n.t("mainDrawer.listItems.management") : ""}
+              placement="right"
+            >
               <ListItem
                 dense
                 button
@@ -404,7 +440,9 @@ const MainListItems = ({ collapsed, drawerClose }) => {
               >
                 <ListItemIcon>
                   <Avatar
-                    className={`${classes.iconHoverActive} ${isManagementActive || managementHover ? "active" : ""}`}
+                    className={`${classes.iconHoverActive} ${
+                      isManagementActive || managementHover ? "active" : ""
+                    }`}
                   >
                     <Dashboard />
                   </Avatar>
@@ -424,11 +462,18 @@ const MainListItems = ({ collapsed, drawerClose }) => {
               timeout="auto"
               unmountOnExit
               style={{
-                backgroundColor: theme.mode === "light" ? "rgba(120,120,120,0.1)" : "rgba(120,120,120,0.5)",
+                backgroundColor:
+                  theme.mode === "light"
+                    ? "rgba(120,120,120,0.1)"
+                    : "rgba(120,120,120,0.5)",
               }}
             >
               <Can
-                role={user.profile === "user" && user.showDashboard === "enabled" ? "admin" : user.profile}
+                role={
+                  user.profile === "user" && user.showDashboard === "enabled"
+                    ? "admin"
+                    : user.profile
+                }
                 perform={"drawer-admin-items:view"}
                 yes={() => (
                   <>
@@ -450,7 +495,11 @@ const MainListItems = ({ collapsed, drawerClose }) => {
                 )}
               />
               <Can
-                role={user.profile === "user" && user.allowRealTime === "enabled" ? "admin" : user.profile}
+                role={
+                  user.profile === "user" && user.allowRealTime === "enabled"
+                    ? "admin"
+                    : user.profile
+                }
                 perform={"drawer-admin-items:view"}
                 yes={() => (
                   <ListItemLink
@@ -544,19 +593,32 @@ const MainListItems = ({ collapsed, drawerClose }) => {
         />
       )}
       <Can
-        role={user.profile === "user" && user.allowConnections === "enabled" ? "admin" : user.profile}
+        role={
+          user.profile === "user" && user.allowConnections === "enabled"
+            ? "admin"
+            : user.profile
+        }
         perform="dashboard:view"
         yes={() => (
           <>
             <Divider />
-            <ListSubheader inset>{i18n.t("mainDrawer.listItems.administration")}</ListSubheader>
+            <ListSubheader inset>
+              {i18n.t("mainDrawer.listItems.administration")}
+            </ListSubheader>
             {showCampaigns && (
               <Can
                 role={user.profile}
                 perform="dashboard:view"
                 yes={() => (
                   <>
-                    <Tooltip title={collapsed ? i18n.t("mainDrawer.listItems.campaigns") : ""} placement="right">
+                    <Tooltip
+                      title={
+                        collapsed
+                          ? i18n.t("mainDrawer.listItems.campaigns")
+                          : ""
+                      }
+                      placement="right"
+                    >
                       <ListItem
                         dense
                         button
@@ -566,8 +628,11 @@ const MainListItems = ({ collapsed, drawerClose }) => {
                       >
                         <ListItemIcon>
                           <Avatar
-                            className={`${classes.iconHoverActive} ${isCampaignRouteActive || campaignHover ? "active" : ""
-                              }`}
+                            className={`${classes.iconHoverActive} ${
+                              isCampaignRouteActive || campaignHover
+                                ? "active"
+                                : ""
+                            }`}
                           >
                             <EventAvailableIcon />
                           </Avatar>
@@ -579,7 +644,11 @@ const MainListItems = ({ collapsed, drawerClose }) => {
                             </Typography>
                           }
                         />
-                        {openCampaignSubmenu ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                        {openCampaignSubmenu ? (
+                          <ExpandLessIcon />
+                        ) : (
+                          <ExpandMoreIcon />
+                        )}
                       </ListItem>
                     </Tooltip>
                     <Collapse
@@ -587,7 +656,10 @@ const MainListItems = ({ collapsed, drawerClose }) => {
                       timeout="auto"
                       unmountOnExit
                       style={{
-                        backgroundColor: theme.mode === "light" ? "rgba(120,120,120,0.1)" : "rgba(120,120,120,0.5)",
+                        backgroundColor:
+                          theme.mode === "light"
+                            ? "rgba(120,120,120,0.1)"
+                            : "rgba(120,120,120,0.5)",
                       }}
                     >
                       <List dense component="div" disablePadding>
@@ -622,7 +694,12 @@ const MainListItems = ({ collapsed, drawerClose }) => {
               perform="dashboard:view"
               yes={() => (
                 <>
-                  <Tooltip title={collapsed ? i18n.t("mainDrawer.listItems.campaigns") : ""} placement="right">
+                  <Tooltip
+                    title={
+                      collapsed ? i18n.t("mainDrawer.listItems.campaigns") : ""
+                    }
+                    placement="right"
+                  >
                     <ListItem
                       dense
                       button
@@ -632,8 +709,11 @@ const MainListItems = ({ collapsed, drawerClose }) => {
                     >
                       <ListItemIcon>
                         <Avatar
-                          className={`${classes.iconHoverActive} ${isFlowbuilderRouteActive || flowHover ? "active" : ""
-                            }`}
+                          className={`${classes.iconHoverActive} ${
+                            isFlowbuilderRouteActive || flowHover
+                              ? "active"
+                              : ""
+                          }`}
                         >
                           <Webhook />
                         </Avatar>
@@ -645,7 +725,11 @@ const MainListItems = ({ collapsed, drawerClose }) => {
                           </Typography>
                         }
                       />
-                      {openFlowSubmenu ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                      {openFlowSubmenu ? (
+                        <ExpandLessIcon />
+                      ) : (
+                        <ExpandMoreIcon />
+                      )}
                     </ListItem>
                   </Tooltip>
 
@@ -654,7 +738,10 @@ const MainListItems = ({ collapsed, drawerClose }) => {
                     timeout="auto"
                     unmountOnExit
                     style={{
-                      backgroundColor: theme.mode === "light" ? "rgba(120,120,120,0.1)" : "rgba(120,120,120,0.5)",
+                      backgroundColor:
+                        theme.mode === "light"
+                          ? "rgba(120,120,120,0.1)"
+                          : "rgba(120,120,120,0.5)",
                     }}
                   >
                     <List dense component="div" disablePadding>
@@ -667,7 +754,7 @@ const MainListItems = ({ collapsed, drawerClose }) => {
 
                       <ListItemLink
                         to="/flowbuilders"
-                        primary={'Fluxo de conversa'}
+                        primary={"Fluxo de conversa"}
                         icon={<ShapeLine />}
                       />
                     </List>
@@ -675,7 +762,6 @@ const MainListItems = ({ collapsed, drawerClose }) => {
                 </>
               )}
             />
-
 
             {user.super && (
               <ListItemLink
@@ -757,7 +843,11 @@ const MainListItems = ({ collapsed, drawerClose }) => {
               />
             )}
             <Can
-              role={user.profile === "user" && user.allowConnections === "enabled" ? "admin" : user.profile}
+              role={
+                user.profile === "user" && user.allowConnections === "enabled"
+                  ? "admin"
+                  : user.profile
+              }
               perform={"drawer-admin-items:view"}
               yes={() => (
                 <ListItemLink
@@ -827,9 +917,7 @@ const MainListItems = ({ collapsed, drawerClose }) => {
                 tooltip={collapsed}
               />
             )}
-
           </>
-
         )}
       />
       {!collapsed && (

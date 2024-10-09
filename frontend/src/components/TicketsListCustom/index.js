@@ -10,6 +10,7 @@ import TicketsListSkeleton from "../TicketsListSkeleton";
 import useTickets from "../../hooks/useTickets";
 import { i18n } from "../../translate/i18n";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 const useStyles = makeStyles((theme) => ({
     ticketsListWrapper: {
@@ -219,11 +220,13 @@ const TicketsListCustom = (props) => {
     const [pageNumber, setPageNumber] = useState(1);
     let [ticketsList, dispatch] = useReducer(reducer, []);
     //   const socketManager = useContext(SocketContext);
-    const { user, socket } = useContext(AuthContext);
+    const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
 
     const { profile, queues } = user;
     const showTicketWithoutQueue = user.allTicket === 'enable';
     const companyId = user.companyId;
+const socket = socketManager.GetSocket(companyId);
 
     useEffect(() => {
         dispatch({ type: "RESET" });

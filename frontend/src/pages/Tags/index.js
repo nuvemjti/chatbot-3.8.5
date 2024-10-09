@@ -36,6 +36,7 @@ import ConfirmationModal from "../../components/ConfirmationModal";
 import toastError from "../../errors/toastError";
 import { Chip, Tooltip } from "@material-ui/core";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import { MoreHoriz } from "@material-ui/icons";
 import ContactTagListModal from "../../components/ContactTagListModal";
 
@@ -74,7 +75,8 @@ const useStyles = makeStyles((theme) => ({
 
 const Tags = () => {
   const classes = useStyles();
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
 
   const [selectedTagContacts, setSelectedTagContacts] = useState([]);
   const [contactModalOpen, setContactModalOpen] = useState(false);
@@ -111,6 +113,9 @@ const Tags = () => {
   }, [searchParam, pageNumber]);
 
   useEffect(() => {
+
+    const socket = socketManager.GetSocket(user.companyId);
+
     const onCompanyTags = (data) => {
       if (data.action === "update" || data.action === "create") {
         dispatch({ type: "UPDATE_TAGS", payload: data.tag });
@@ -125,7 +130,7 @@ const Tags = () => {
     return () => {
       socket.off(`company${user.companyId}-tag`, onCompanyTags);
     };
-  }, [socket, user.companyId]);
+  }, [socketManager]);
 
   const handleOpenTagModal = () => {
     setSelectedTag(null);

@@ -21,6 +21,7 @@ import { head } from "lodash";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import MessageVariablesPicker from "../MessageVariablesPicker";
 import ButtonWithSpinner from "../ButtonWithSpinner";
 

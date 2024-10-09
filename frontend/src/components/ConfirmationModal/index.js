@@ -7,6 +7,7 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import Typography from "@material-ui/core/Typography";
 import api from "../../services/api";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import { Grid, Select, MenuItem, ListItemText } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
 import { Face, Facebook, WhatsApp } from "@material-ui/icons";

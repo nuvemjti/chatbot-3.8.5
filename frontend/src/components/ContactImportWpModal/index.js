@@ -6,6 +6,7 @@ import api from "../../services/api";
 import { Can } from "../Can";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import * as XLSX from "xlsx";
 import { useHistory } from 'react-router-dom/cjs/react-router-dom.min';
 import toastError from '../../errors/toastError';

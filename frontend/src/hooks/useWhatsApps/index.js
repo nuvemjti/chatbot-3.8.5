@@ -4,6 +4,7 @@ import toastError from "../../errors/toastError";
 import api from "../../services/api";
 // import { SocketContext } from "../../context/Socket/SocketContext";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import { isNill } from "lodash";
 
 const reducer = (state, action) => {
@@ -59,7 +60,8 @@ const useWhatsApps = () => {
   const [whatsApps, dispatch] = useReducer(reducer, []);
   const [loading, setLoading] = useState(true);
 //   const socketManager = useContext(SocketContext);
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
 
 
 
@@ -82,7 +84,7 @@ const useWhatsApps = () => {
     if (user.companyId) {
 
       const companyId = user.companyId;
-//    const socket = socketManager.GetSocket();
+      const socket = socketManager.GetSocket(companyId);
 
       const onCompanyWhatsapp = (data) => {
         if (data.action === "update") {
@@ -107,7 +109,7 @@ const useWhatsApps = () => {
         socket.off(`company-${companyId}-whatsappSession`, onCompanyWhatsappSession);
       };
     }
-  }, [socket]);
+  }, [socketManager]);
 
   return { whatsApps, loading };
 };

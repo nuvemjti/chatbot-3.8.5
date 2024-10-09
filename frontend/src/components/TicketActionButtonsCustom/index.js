@@ -14,6 +14,7 @@ import ButtonWithSpinner from "../ButtonWithSpinner";
 import toastError from "../../errors/toastError";
 import usePlans from "../../hooks/usePlans";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import { TicketsContext } from "../../context/Tickets/TicketsContext";
 import Tooltip from '@material-ui/core/Tooltip';
 import ConfirmationModal from "../ConfirmationModal";
@@ -110,6 +111,8 @@ const TicketActionButtonsCustom = ({ ticket
     const [anchorEl, setAnchorEl] = useState(null);
     const [menuOpen, setMenuOpen] = useState(false);
 
+    const socketManager = useContext(SocketContext);
+    
     useEffect(() => {
         fetchData();
 
@@ -122,6 +125,7 @@ const TicketActionButtonsCustom = ({ ticket
 
     const fetchData = async () => {
         const companyId = user.companyId;
+const socket = socketManager.GetSocket(companyId);
         const planConfigs = await getPlanCompany(undefined, companyId);
         setShowSchedules(planConfigs.plan.useSchedules);
         setOpenTicketMessageDialog(false);

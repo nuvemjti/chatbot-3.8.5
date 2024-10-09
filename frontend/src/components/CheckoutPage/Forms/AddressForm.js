@@ -5,7 +5,7 @@ import { AuthContext } from "../../../context/Auth/AuthContext";
 
 export default function AddressForm(props) {
 
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
 
   const [billingName, setBillingName] = useState(user.company.name);
   const [addressZipCode, setAddressZipCode] = useState(user.company.document);

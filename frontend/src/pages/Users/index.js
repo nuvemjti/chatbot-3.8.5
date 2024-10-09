@@ -27,10 +27,10 @@ import TableRowSkeleton from "../../components/TableRowSkeleton";
 import UserModal from "../../components/UserModal";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import toastError from "../../errors/toastError";
-import { SocketContext, socketManager } from "../../context/Socket/SocketContext";
 import UserStatusIcon from "../../components/UserModal/statusIcon";
 import { getBackendUrl } from "../../config";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import { Avatar } from "@material-ui/core";
 import ForbiddenPage from "../../components/ForbiddenPage";
 
@@ -122,7 +122,8 @@ const Users = () => {
   const [users, dispatch] = useReducer(reducer, []);
   const { user: loggedInUser, socket } = useContext(AuthContext)
   const { profileImage } = loggedInUser;
-
+  const socketManager = useContext(SocketContext);
+  
   useEffect(() => {
     dispatch({ type: "RESET" });
     setPageNumber(1);
@@ -163,7 +164,7 @@ const Users = () => {
         socket.off(`company-${companyId}-user`, onCompanyUser);
       };
     }
-  }, [socket]);
+  }, [socketManager]);
 
   const handleOpenUserModal = () => {
     setSelectedUser(null);

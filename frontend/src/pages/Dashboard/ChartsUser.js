@@ -22,6 +22,7 @@ import { makeStyles, useTheme } from "@material-ui/core/styles";
 import './button.css';
 import { i18n } from '../../translate/i18n';
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 const useStyles = makeStyles((theme) => ({
     container: {
@@ -80,6 +81,7 @@ export const ChatsUser = () => {
     const { user } = useContext(AuthContext);
 
     const companyId = user.companyId;
+
 
     useEffect(() => {
         if (companyId) {

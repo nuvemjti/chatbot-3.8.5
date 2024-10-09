@@ -24,6 +24,7 @@ import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import QueueSelect from "../QueueSelect";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import useWhatsApps from "../../hooks/useWhatsApps";
 
 import { Can } from "../Can";

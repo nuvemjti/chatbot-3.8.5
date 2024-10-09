@@ -17,6 +17,7 @@ import ButtonWithSpinner from "../ButtonWithSpinner";
 import ContactModal from "../ContactModal";
 import toastError from "../../errors/toastError"; 
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import { Typography } from "@mui/material";
 import { FormControlLabel, Switch } from "@material-ui/core";
 

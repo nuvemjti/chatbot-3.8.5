@@ -24,6 +24,7 @@ import CompanyModal from "../../components/CompaniesModal";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import { useDate } from "../../hooks/useDate";
 import usePlans from "../../hooks/usePlans";
 import moment from "moment";
@@ -98,7 +99,8 @@ const Companies = () => {
 
     // const { getPlanCompany } = usePlans();
   //   const socketManager = useContext(SocketContext);
-    const { user, socket } = useContext(AuthContext);
+    const { user } = useContext(AuthContext);
+
 
 
     useEffect(() => {
@@ -139,15 +141,7 @@ const Companies = () => {
         return () => clearTimeout(delayDebounceFn);
     }, [searchParam, pageNumber]);
 
-//     useEffect(() => {
-//         const companyId = user.companyId;
-//   //    const socket = socketManager.GetSocket();
-//         // const socket = socketConnection();
 
-//         return () => {
-//             socket.disconnect();
-//         };
-//     }, []);
 
     const handleOpenCompanyModal = () => {
         setSelectedCompany(null);

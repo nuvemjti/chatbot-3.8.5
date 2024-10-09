@@ -27,6 +27,7 @@ import ConfirmationModal from "../../components/ConfirmationModal";
 import ForbiddenPage from "../../components/ForbiddenPage";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 const useStyles = makeStyles((theme) => ({
   mainPaper: {
@@ -72,7 +73,8 @@ const CampaignsConfig = () => {
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [selectedKey, setSelectedKey] = useState(null);
   const [variable, setVariable] = useState({ key: "", value: "" });
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
 
   const [sabado, setSabado] = React.useState(false);
   const [domingo, setDomingo] = React.useState(false);
@@ -85,6 +87,7 @@ const CampaignsConfig = () => {
   useEffect(() => {
     async function fetchData() {
       const companyId = user.companyId;
+const socket = socketManager.GetSocket(companyId);
       const planConfigs = await getPlanCompany(undefined, companyId);
       if (!planConfigs.plan.useCampaigns) {
         toast.error("Esta empresa não possui permissão para acessar essa página! Estamos lhe redirecionando.");

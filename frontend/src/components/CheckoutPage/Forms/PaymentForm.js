@@ -14,6 +14,7 @@ import MinimizeIcon from '@material-ui/icons/Minimize';
 import AddIcon from '@material-ui/icons/Add';
 import usePlans from "../../../hooks/usePlans";
 import { AuthContext } from "../../../context/Auth/AuthContext";
+import { SocketContext } from '../../../context/Socket/SocketContext';
 
 const useStyles = makeStyles((theme) => ({
   '@global': {
@@ -77,7 +78,8 @@ export default function Pricing(props) {
   const [connectionsPlans, setConnectionsPlans] = React.useState(3);
   const [storagePlans, setStoragePlans] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
 
   const { getPlanCompany } = usePlans();
 

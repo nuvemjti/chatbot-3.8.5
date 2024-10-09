@@ -28,6 +28,7 @@ import PromptModal from "../../components/PromptModal";
 import { toast } from "react-toastify";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import usePlans from "../../hooks/usePlans";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import ForbiddenPage from "../../components/ForbiddenPage";
@@ -100,7 +101,8 @@ const Prompts = () => {
   const [selectedPrompt, setSelectedPrompt] = useState(null);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   //   const socketManager = useContext(SocketContext);
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
 
   const { getPlanCompany } = usePlans();
   const history = useHistory();
@@ -136,7 +138,8 @@ const Prompts = () => {
   }, []);
 
   useEffect(() => {
-    // const socket = socketManager.GetSocket();
+    const companyId = user.companyId;
+    const socket = socketManager.GetSocket(companyId);
 
     const onPromptEvent = (data) => {
       if (data.action === "update" || data.action === "create") {
@@ -152,7 +155,7 @@ const Prompts = () => {
     return () => {
       socket.off(`company-${companyId}-prompt`, onPromptEvent);
     };
-  }, [socket]);
+  }, [socketManager]);
 
   const handleOpenPromptModal = () => {
     setPromptModalOpen(true);

@@ -26,6 +26,7 @@ import api from "../../services/api";
 import MarkdownWrapper from "../MarkdownWrapper";
 import { Tooltip } from "@material-ui/core";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import toastError from "../../errors/toastError";
 
 import facebookIcon from "../../assets/facebook.png";

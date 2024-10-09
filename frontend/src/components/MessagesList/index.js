@@ -44,6 +44,7 @@ import { i18n } from "../../translate/i18n";
 import SelectMessageCheckbox from "./SelectMessageCheckbox";
 import useCompanySettings from "../../hooks/useSettings/companySettings";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import { QueueSelectedContext } from "../../context/QueuesSelected/QueuesSelectedContext";
 import AudioModal from "../AudioModal";
 import { messages } from "../../translate/languages";
@@ -460,7 +461,8 @@ const MessagesList = ({
 
   const { showSelectMessageCheckbox } = useContext(ForwardMessageContext);
 
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
 
   const companyId = user.companyId;
 
@@ -538,7 +540,7 @@ const MessagesList = ({
 
     const companyId = user.companyId;
 
-    //    const socket = socketManager.GetSocket();
+    const socket = socketManager.GetSocket(companyId);
     const connectEventMessagesList = () => {
       socket.emit("joinChatBox", `${ticketId}`);
     }

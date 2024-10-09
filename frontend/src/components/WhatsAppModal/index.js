@@ -41,6 +41,7 @@ import useCompanySettings from "../../hooks/useSettings/companySettings";
 import SchedulesForm from "../SchedulesForm";
 import usePlans from "../../hooks/usePlans";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -161,7 +162,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
   const [showOpenAi, setShowOpenAi] = useState(false);
   const [showIntegrations, setShowIntegrations] = useState(false);
   const { user } = useContext(AuthContext);
-
+  const socketManager = useContext(SocketContext);
 
 
   const [schedules, setSchedules] = useState([
@@ -201,6 +202,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
   useEffect(() => {
     async function fetchData() {
       const companyId = user.companyId;
+const socket = socketManager.GetSocket(companyId);
       const planConfigs = await getPlanCompany(undefined, companyId);
 
       setShowOpenAi(planConfigs.plan.useOpenAi);

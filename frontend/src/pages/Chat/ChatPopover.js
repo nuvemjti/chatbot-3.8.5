@@ -23,6 +23,7 @@ import { isArray } from "lodash";
 // import { SocketContext } from "../../context/Socket/SocketContext";
 import { useDate } from "../../hooks/useDate";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 import notifySound from "../../assets/chat_notify.mp3";
 import useSound from "use-sound";
@@ -98,9 +99,9 @@ const reducer = (state, action) => {
 export default function ChatPopover() {
   const classes = useStyles();
 
-//   const socketManager = useContext(SocketContext);
-  const { user, socket } = useContext(AuthContext);
-
+  //   const socketManager = useContext(SocketContext);
+  const { user } = useContext(AuthContext);
+  const socketManager = useContext(SocketContext);
 
   const [loading, setLoading] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -139,22 +140,20 @@ export default function ChatPopover() {
 
   useEffect(() => {
     if (user.companyId) {
-
       const companyId = user.companyId;
-//    const socket = socketManager.GetSocket();
+      const socket = socketManager.GetSocket(companyId);
 
       const onCompanyChatPopover = (data) => {
         if (data.action === "new-message") {
           dispatch({ type: "CHANGE_CHAT", payload: data });
           if (data.newMessage.senderId !== user.id) {
-
             soundAlertRef.current();
           }
         }
         if (data.action === "update") {
           dispatch({ type: "CHANGE_CHAT", payload: data });
         }
-      }
+      };
 
       socket.on(`company-${companyId}-chat`, onCompanyChatPopover);
 
@@ -164,7 +163,6 @@ export default function ChatPopover() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
-
 
   useEffect(() => {
     let unreadsCount = 0;

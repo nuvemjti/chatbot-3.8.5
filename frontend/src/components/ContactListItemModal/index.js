@@ -21,6 +21,7 @@ import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import { useParams } from "react-router-dom";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 const useStyles = makeStyles((theme) => ({
   root: {

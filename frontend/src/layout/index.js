@@ -56,6 +56,7 @@ import Brightness7Icon from "@material-ui/icons/Brightness7";
 import { getBackendUrl } from "../config";
 import useSettings from "../hooks/useSettings";
 import VersionControl from "../components/VersionControl";
+import { SocketContext } from "../context/Socket/SocketContext";
 
 // import { SocketContext } from "../context/Socket/SocketContext";
 
@@ -205,7 +206,12 @@ const useStyles = makeStyles((theme) => ({
       maxWidth: 180,
     },
     logo: theme.logo,
-    content: "url(" + (theme.mode === "light" ? theme.calculatedLogoLight() : theme.calculatedLogoDark()) + ")"
+    content:
+      "url(" +
+      (theme.mode === "light"
+        ? theme.calculatedLogoLight()
+        : theme.calculatedLogoDark()) +
+      ")",
   },
   hideLogo: {
     display: "none",
@@ -274,7 +280,8 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   const [drawerVariant, setDrawerVariant] = useState("permanent");
   // const [dueDate, setDueDate] = useState("");
   //   const socketManager = useContext(SocketContext);
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+  const socketManager = useContext(SocketContext);
 
   const theme = useTheme();
   const { colorMode } = useContext(ColorModeContext);
@@ -297,11 +304,8 @@ const LoggedInLayout = ({ children, themeToggle }) => {
     const getSetting = async () => {
       const response = await settings.get("wtV");
 
-
       if (response) {
-
         setUserToken("disabled");
-
       } else {
         setUserToken("disabled");
       }
@@ -309,8 +313,6 @@ const LoggedInLayout = ({ children, themeToggle }) => {
 
     getSetting();
   });
-
-  
 
   useEffect(() => {
     // if (localStorage.getItem("public-token") === null) {
@@ -338,11 +340,11 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   }, [drawerOpen]);
 
   useEffect(() => {
-
     const companyId = user.companyId;
     const userId = user.id;
+
     if (companyId) {
-      //    const socket = socketManager.GetSocket();
+      const socket = socketManager.GetSocket(companyId);
 
       const ImageUrl = user.profileImage;
       if (ImageUrl !== undefined && ImageUrl !== null)
@@ -359,7 +361,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
             window.location.reload();
           }, 1000);
         }
-      }
+      };
 
       socket.on(`company-${companyId}-auth`, onCompanyAuthLayout);
 
@@ -374,7 +376,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
       };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [socket]);
+  }, [socketManager]);
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -431,14 +433,16 @@ const LoggedInLayout = ({ children, themeToggle }) => {
         open={drawerOpen}
       >
         <div className={classes.toolbarIcon}>
-          <img className={drawerOpen ? classes.logo : classes.hideLogo}
+          <img
+            className={drawerOpen ? classes.logo : classes.hideLogo}
             style={{
               display: "block",
               margin: "0 auto",
               height: "50px",
               width: "100%",
             }}
-            alt="logo" />
+            alt="logo"
+          />
           <IconButton onClick={() => setDrawerOpen(!drawerOpen)}>
             <ChevronLeftIcon />
           </IconButton>
@@ -476,8 +480,8 @@ const LoggedInLayout = ({ children, themeToggle }) => {
           >
             {/* {greaterThenSm && user?.profile === "admin" && getDateAndDifDays(user?.company?.dueDate).difData < 7 ? ( */}
             {greaterThenSm &&
-              user?.profile === "admin" &&
-              user?.company?.dueDate ? (
+            user?.profile === "admin" &&
+            user?.company?.dueDate ? (
               <>
                 {i18n.t("mainDrawer.appBar.user.message")} <b>{user.name}</b>,{" "}
                 {i18n.t("mainDrawer.appBar.user.messageEnd")}{" "}
@@ -500,7 +504,6 @@ const LoggedInLayout = ({ children, themeToggle }) => {
               label={i18n.t("mainDrawer.appBar.user.token")}
             />
           )}
-         
 
           {/* DESABILITADO POIS TEM BUGS */}
           {/* <UserLanguageSelector /> */}

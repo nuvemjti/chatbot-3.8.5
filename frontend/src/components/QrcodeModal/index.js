@@ -7,6 +7,7 @@ import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -18,7 +19,8 @@ const useStyles = makeStyles((theme) => ({
 const QrcodeModal = ({ open, onClose, whatsAppId }) => {
   const classes = useStyles();
   const [qrCode, setQrCode] = useState("");
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -37,6 +39,7 @@ const QrcodeModal = ({ open, onClose, whatsAppId }) => {
   useEffect(() => {
     if (!whatsAppId) return;
     const companyId = user.companyId;
+const socket = socketManager.GetSocket(companyId);
     // const socket = socketConnection({ companyId, userId: user.id });
 
     const onWhatsappData = (data) => {

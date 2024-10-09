@@ -12,6 +12,7 @@ import { i18n } from "../../translate/i18n.js";
 import toastError from "../../errors/toastError";
 // import { SocketContext } from "../../context/Socket/SocketContext";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -38,7 +39,8 @@ const useStyles = makeStyles((theme) => ({
 const Settings = () => {
   const classes = useStyles();
   //   const socketManager = useContext(SocketContext);
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
 
   const [settings, setSettings] = useState([]);
 
@@ -55,8 +57,8 @@ const Settings = () => {
   }, []);
 
   useEffect(() => {
-    const companyId = user.companyId;
-    // const socket = socketManager.GetSocket();
+const companyId = user.companyId;
+      const socket = socketManager.GetSocket(companyId);
 
     const onSettingsEvent = (data) => {
       if (data.action === "update") {
@@ -73,7 +75,7 @@ const Settings = () => {
     return () => {
       socket.off(`company-${companyId}-settings`, onSettingsEvent);
     };
-  }, [socket]);
+  }, [socketManager]);
 
   const handleChangeSetting = async (e) => {
     const selectedValue = e.target.value;

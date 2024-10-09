@@ -44,6 +44,7 @@ import MainHeaderButtonsWrapper from "../../components/MainHeaderButtonsWrapper"
 import Title from "../../components/Title";
 import TableRowSkeleton from "../../components/TableRowSkeleton";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import useCompanies from "../../hooks/useCompanies";
 import api from "../../services/api";
 import WhatsAppModal from "../../components/WhatsAppModal";
@@ -128,7 +129,8 @@ const IconChannel = channel => {
 
 const AllConnections = () => {
   const classes = useStyles();
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
   const { list } = useCompanies();
   const [loadingWhatsapp, setLoadingWhatsapp] = useState(true);
   const [loadingComp, setLoadingComp] = useState(false);

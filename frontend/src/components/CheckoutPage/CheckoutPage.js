@@ -18,6 +18,7 @@ import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import { toast } from "react-toastify";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 
 import validationSchema from "./FormModel/validationSchema";
 import checkoutFormModel from "./FormModel/checkoutFormModel";
@@ -35,7 +36,8 @@ export default function CheckoutPage(props) {
   const [invoiceId, setinvoiceId] = useState(props.Invoice.id);
   const currentValidationSchema = validationSchema[activeStep];
   const isLastStep = activeStep === steps.length - 1;
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
 
   function _renderStepContent(step, setFieldValue, setActiveStep, values) {
 

@@ -17,6 +17,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import api from "../../services/api";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import ButtonWithSpinner from "../ButtonWithSpinner";
 import { i18n } from "../../translate/i18n";
 import toastError from "../../errors/toastError";

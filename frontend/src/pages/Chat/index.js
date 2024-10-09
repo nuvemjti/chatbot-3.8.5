@@ -24,6 +24,7 @@ import api from "../../services/api";
 import { has, isObject } from "lodash";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import withWidth, { isWidthUp } from "@material-ui/core/withWidth";
 import { i18n } from "../../translate/i18n";
 
@@ -146,7 +147,8 @@ export function ChatModal({
 
 function Chat(props) {
   const classes = useStyles();
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
   const history = useHistory();
 
   const [showDialog, setShowDialog] = useState(false);
@@ -202,6 +204,7 @@ function Chat(props) {
 
   useEffect(() => {
     const companyId = user.companyId;
+const socket = socketManager.GetSocket(companyId);
     // const socket = socketConnection({ companyId, userId: user.id });
 
     const onChatUser = (data) => {

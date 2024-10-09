@@ -44,6 +44,7 @@ import { Button, Snackbar } from "@material-ui/core";
 
 import { i18n } from "../../translate/i18n";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import { QueueSelectedContext } from "../../context/QueuesSelected/QueuesSelectedContext";
 
 import api from "../../services/api";

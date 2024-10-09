@@ -17,6 +17,7 @@ import { ForwardMessageProvider } from "../../context/ForwarMessage/ForwardMessa
 
 import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import { TagsContainer } from "../TagsContainer";
 import { isNil } from 'lodash';
 import { EditMessageProvider } from "../../context/EditingMessage/EditingMessageContext";
@@ -64,7 +65,8 @@ const Ticket = () => {
   const history = useHistory();
   const classes = useStyles();
 
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
   const { setTabOpen } = useContext(TicketsContext);
 
 
@@ -75,11 +77,6 @@ const Ticket = () => {
   const [dragDropFiles, setDragDropFiles] = useState([]);
   const { companyId } = user;
 
-  useEffect(() => {
-    console.log("======== Ticket ===========")
-    console.log(ticket)
-    console.log("===========================")
-}, [ticket])
 
   useEffect(() => {
     setLoading(true);
@@ -118,7 +115,7 @@ const Ticket = () => {
     }
 
     if (user.companyId) {
-      //    const socket = socketManager.GetSocket();
+      const socket = socketManager.GetSocket(companyId);
 
       const onConnectTicket = () => {
         socket.emit("joinChatBox", `${ticket.id}`);

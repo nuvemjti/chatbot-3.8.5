@@ -13,6 +13,7 @@ import {
 } from "@material-ui/core";
 import { useHistory } from "react-router-dom";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import MessagesList from "../MessagesList";
 import { ReplyMessageProvider } from "../../context/ReplyingMessage/ReplyingMessageContext";
 import { ForwardMessageProvider } from "../../context/ForwarMessage/ForwardMessageContext";
@@ -63,7 +64,8 @@ export default function TicketMessagesDialog({ open, handleClose, ticketId }) {
   const history = useHistory();
   const classes = useStyles();
 
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
 
   const [, setDrawerOpen] = useState(false);
   const [loading, setLoading] = useState(true);

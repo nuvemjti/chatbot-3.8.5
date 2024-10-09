@@ -22,6 +22,7 @@ import ContactModal from "../ContactModal";
 import { ContactNotes } from "../ContactNotes";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import useCompanySettings from "../../hooks/useSettings/companySettings";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";

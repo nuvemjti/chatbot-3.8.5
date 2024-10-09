@@ -38,6 +38,7 @@ import toastError from "../../errors/toastError";
 import { Chip } from "@material-ui/core";
 // import { SocketContext } from "../../context/Socket/SocketContext";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { SocketContext } from "../../context/Socket/SocketContext";
 import { CheckCircle } from "@material-ui/icons";
 
 const reducer = (state, action) => {
@@ -98,7 +99,8 @@ const Tags = () => {
   const history = useHistory(); // Inicialize o useHistory
 
   //   const socketManager = useContext(SocketContext);
-  const { user, socket } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
+const socketManager = useContext(SocketContext);
 
 
   const [loading, setLoading] = useState(false);
@@ -137,7 +139,8 @@ const Tags = () => {
   }, [searchParam]);
 
   useEffect(() => {
-    // const socket = socketManager.GetSocket(user.companyId, user.id);
+    const companyId = user.companyId;
+    const socket = socketManager.GetSocket(companyId);
 
     const onTagsEvent = (data) => {
       if (data.action === "update" || data.action === "create") {
@@ -153,7 +156,7 @@ const Tags = () => {
     return () => {
       socket.off(`company${user.companyId}-tag`, onTagsEvent);
     };
-  }, [socket]);
+  }, [socketManager]);
 
   const handleOpenTagModal = () => {
     setSelectedTag(null);
