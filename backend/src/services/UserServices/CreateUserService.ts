@@ -107,10 +107,14 @@ const CreateUserService = async ({
     throw new AppError(err.message);
   }
 
+  // Passando para maiuscula para minuscula
+  // Letra maiuscula não está autenticando
+  const passwordLowerCase = password.toLocaleLowerCase()
+
   const user = await User.create(
     {
       email,
-      password,
+      password: passwordLowerCase,
       name,
       companyId,
       profile,

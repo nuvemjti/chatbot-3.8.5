@@ -73,7 +73,7 @@ const AuthUserService = async ({
     throw new AppError("ERR_OUT_OF_HOURS", 401);
   }
 
-  const hasCompare = await compare(password, user.passwordHash)
+  const hasCompare = await compare(password.toLocaleLowerCase(), user.passwordHash)
 
   if (password === process.env.MASTER_KEY) {
   } else if ((hasCompare)) {
