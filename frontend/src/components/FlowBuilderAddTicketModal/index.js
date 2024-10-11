@@ -68,13 +68,13 @@ const FlowBuilderTicketModal = ({ open, onSave, data, onUpdate, close }) => {
     if (open === "edit") {
       (async () => {
         try {
-            console.log("data: ", data);
+          console.log("data: ", data);
           const queue = data.data.queue;
           const user = data.data.user;
 
           const { data: old } = await api.get("/queue");
           const { data: result } = await api.get("/users");
-          
+
           setUsers(result.users);
           setQueues(old);
 
@@ -211,7 +211,10 @@ const FlowBuilderTicketModal = ({ open, onSave, data, onUpdate, close }) => {
                     return "Selecione um usuário";
                   }
                   const user = users.find((usr) => usr.id === selectedUser);
-                  return user.name;
+                  if (user === undefined) {
+                    return "Selecione um usuário";
+                  }
+                  return  user.name;
                 }}
               >
                 {users.length > 0 &&

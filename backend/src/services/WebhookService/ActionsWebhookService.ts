@@ -44,6 +44,7 @@ import { getWbot } from "../../libs/wbot";
 import { proto } from "@whiskeysockets/baileys";
 import { handleOpenAi } from "../IntegrationsServices/OpenAiService";
 import { IOpenAi } from "../../@types/openai";
+import User from "../../models/User";
 
 interface IAddContact {
   companyId: number;
@@ -213,12 +214,11 @@ export const ActionsWebhookService = async (
           nodeSelected = otherNode;
         }
       }
-        
+
       if (nodeSelected.type === "message") {
-        
         let msg;
-        
-        const webhook = ticket.dataWebhook
+
+        const webhook = ticket.dataWebhook;
 
         if (webhook && webhook.hasOwnProperty("variables")) {
           msg = {
@@ -234,7 +234,6 @@ export const ActionsWebhookService = async (
           number: numberClient,
           body: msg.body
         });
-        
 
         //TESTE BOTÃO
         //await SendMessageFlow(whatsapp, {
@@ -343,13 +342,23 @@ export const ActionsWebhookService = async (
       }
 
       if (nodeSelected.type === "ticket") {
-        const queueId = nodeSelected.data?.data?.id || nodeSelected.data?.id;
-        const queue = await ShowQueueService(queueId, companyId);
+        console.log("======= TICKET =========");
+        const { queue, user } = nodeSelected.data;
+
+        const queueSelected = await ShowQueueService(queue.id, companyId);
+        const userSelected = await User.findOne({
+          where: {
+            id: user.id,
+            companyId
+          }
+        });
+        if (!queueSelected) continue;
+        if(!userSelected) continue;
 
         await ticket.update({
           status: "pending",
-          queueId: queue.id,
-          userId: ticket.userId,
+          queueId: queueSelected.id,
+          userId: user.id,
           companyId: companyId,
           flowWebhook: true,
           lastFlowId: nodeSelected.id,
@@ -361,7 +370,7 @@ export const ActionsWebhookService = async (
           ticketId: ticket.id,
           companyId,
           whatsappId: ticket.whatsappId,
-          userId: ticket.userId
+          userId: user.id
         });
 
         await UpdateTicketService({
@@ -376,7 +385,8 @@ export const ActionsWebhookService = async (
         await CreateLogTicketService({
           ticketId: ticket.id,
           type: "queue",
-          queueId: queue.id
+          queueId: queue.id,
+          userId: user.id
         });
 
         let settings = await CompaniesSettings.findOne({
