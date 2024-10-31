@@ -173,11 +173,11 @@ const App = () => {
       });
     getPublicSetting("appName")
       .then((name) => {
-        setAppName(name || "WORKZAP");
+        setAppName(name || "ZION CRM");
       })
       .catch((error) => {
         console.log("!==== Erro ao carregar temas: ====!", error);
-        setAppName("WORKZAP");
+        setAppName("ZION CRM");
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
