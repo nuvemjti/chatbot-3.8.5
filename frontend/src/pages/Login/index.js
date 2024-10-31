@@ -24,7 +24,7 @@ const Copyright = () => {
 		<Typography variant="body2" color="#fff" align="center">
 			{"Copyright "}
  			<Link color="#fff" href="#">
- 				Core Sistemas
+ 				ZION TECNOLOGIA
  			</Link>{" "}
  			{new Date().getFullYear()}
  			{"."}
@@ -229,7 +229,7 @@ const handleChangeInput = (name, value) => {
 							)}
 						</form>
 					</div>
-<Box> Copyright 2024 - Core Sistemas </Box>
+<Box> Copyright 2024 - ZION TECNOLOGIA </Box>
 				</Container>
 			</div>
 		</>
