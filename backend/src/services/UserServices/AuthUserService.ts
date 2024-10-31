@@ -9,7 +9,7 @@ import Queue from "../../models/Queue";
 import Company from "../../models/Company";
 import Setting from "../../models/Setting";
 import CompaniesSettings from "../../models/CompaniesSettings";
-
+import { hash, compare } from "bcryptjs";
 interface SerializedUser {
   id: number;
   name: string;
@@ -72,8 +72,12 @@ const AuthUserService = async ({
     throw new AppError("ERR_OUT_OF_HOURS", 401);
   }
 
-  if (password === process.env.MASTER_KEY) {
-  } else if ((await user.checkPassword(password))) {
+  //if (password === process.env.MASTER_KEY) {
+  //} else if ((await user.checkPassword(password))) {
+    const hasCompare = await compare(password, user.passwordHash)
+
+    if (password === process.env.MASTER_KEY) {
+    } else if ((hasCompare)) {
 
     const company = await Company.findByPk(user?.companyId);
     await company.update({
