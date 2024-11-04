@@ -136,8 +136,8 @@ const FlowBuilder = () => {
 
   const [hasMore, setHasMore] = useState(false);
   const [reloadData, setReloadData] = useState(false);
-  const { user } = useContext(AuthContext);
-  const socketManager = useContext(SocketContext);
+  const { user, socket } = useContext(AuthContext);
+
   useEffect(() => {
     dispatch({ type: "RESET" });
     setPageNumber(1);
@@ -163,9 +163,8 @@ const FlowBuilder = () => {
   }, [searchParam, pageNumber, reloadData]);
 
   useEffect(() => {
-    const companyId = user.companyId;
-		const socket = socketManager.GetSocket(companyId);
-
+    const companyId = user.companyId
+   
 
    const onContact = (data) => {
     if (data.action === "update" || data.action === "create") {

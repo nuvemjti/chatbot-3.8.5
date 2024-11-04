@@ -120,7 +120,7 @@ const Users = () => {
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [searchParam, setSearchParam] = useState("");
   const [users, dispatch] = useReducer(reducer, []);
-  const { user: loggedInUser } = useContext(AuthContext)
+  const { user: loggedInUser, socket } = useContext(AuthContext)
   const { profileImage } = loggedInUser;
 
   useEffect(() => {
@@ -150,8 +150,6 @@ const Users = () => {
   useEffect(() => {
     if (loggedInUser) {
       const companyId = loggedInUser.companyId;
-      const socket = socketManager.GetSocket(companyId); // Criação do socket
-
       const onCompanyUser = (data) => {
         if (data.action === "update" || data.action === "create") {
           dispatch({ type: "UPDATE_USERS", payload: data.user });
@@ -160,17 +158,12 @@ const Users = () => {
           dispatch({ type: "DELETE_USER", payload: +data.userId });
         }
       };
-
-      // Escuta o evento no canal específico
       socket.on(`company-${companyId}-user`, onCompanyUser);
-
       return () => {
-        // Remove o listener ao desmontar
         socket.off(`company-${companyId}-user`, onCompanyUser);
       };
     }
-  }, [loggedInUser, dispatch]); // Atualiza apenas quando loggedInUser ou dispatch mudar
-
+  }, [socket]);
 
   const handleOpenUserModal = () => {
     setSelectedUser(null);
