@@ -150,22 +150,27 @@ const Users = () => {
   useEffect(() => {
     if (loggedInUser) {
       const companyId = loggedInUser.companyId;
-      const socket = socketManager.GetSocket(companyId);
-      
-      function onCompanyUser(data) {
+      const socket = socketManager.GetSocket(companyId); // Criação do socket
+
+      const onCompanyUser = (data) => {
         if (data.action === "update" || data.action === "create") {
           dispatch({ type: "UPDATE_USERS", payload: data.user });
         }
         if (data.action === "delete") {
           dispatch({ type: "DELETE_USER", payload: +data.userId });
         }
-      }
+      };
+
+      // Escuta o evento no canal específico
       socket.on(`company-${companyId}-user`, onCompanyUser);
+
       return () => {
+        // Remove o listener ao desmontar
         socket.off(`company-${companyId}-user`, onCompanyUser);
       };
     }
-  }, [socket]);
+  }, [loggedInUser, dispatch]); // Atualiza apenas quando loggedInUser ou dispatch mudar
+
 
   const handleOpenUserModal = () => {
     setSelectedUser(null);
