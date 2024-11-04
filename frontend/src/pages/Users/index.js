@@ -120,7 +120,7 @@ const Users = () => {
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [searchParam, setSearchParam] = useState("");
   const [users, dispatch] = useReducer(reducer, []);
-  const { user: loggedInUser, socket } = useContext(AuthContext)
+  const { user: loggedInUser } = useContext(AuthContext)
   const { profileImage } = loggedInUser;
 
   useEffect(() => {
@@ -150,6 +150,8 @@ const Users = () => {
   useEffect(() => {
     if (loggedInUser) {
       const companyId = loggedInUser.companyId;
+      const socket = socketManager.GetSocket(companyId);
+      
       const onCompanyUser = (data) => {
         if (data.action === "update" || data.action === "create") {
           dispatch({ type: "UPDATE_USERS", payload: data.user });
