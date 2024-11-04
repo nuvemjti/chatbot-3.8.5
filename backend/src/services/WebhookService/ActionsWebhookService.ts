@@ -616,7 +616,7 @@ export const ActionsWebhookService = async (
           console.log(681, "menu");
           let optionsMenu = "";
           nodeSelected.data.arrayOption.map(item => {
-            optionsMenu += `[${item.number}] ${item.value}\n`;
+            optionsMenu += `*${item.number}* - ${item.value}\n`;
           });
 
           const menuCreate = `${nodeSelected.data.message}\n\n${optionsMenu}`;
